@@ -40,6 +40,9 @@ const images = Array.from({ length: 6 }, (_, i) => i + 1);
   </dialog>
 
   <style>
+    dialog {
+      outline: none;
+    }
     dialog::backdrop {
       background: rgba(0, 0, 0, 0.85);
     }
@@ -51,6 +54,10 @@ const images = Array.from({ length: 6 }, (_, i) => i + 1);
       border: none;
       cursor: pointer;
       background: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .thumb img {
+      pointer-events: none;
     }
     #lightbox-img {
       opacity: 0;
