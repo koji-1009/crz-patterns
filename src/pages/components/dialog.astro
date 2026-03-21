@@ -1,0 +1,139 @@
+---
+import PatternLayout from "../../layouts/PatternLayout.astro";
+---
+
+<PatternLayout
+  title="Modal / Dialog"
+  assumption="createPortal + useState + focus trap library"
+  technique="<dialog> + showModal() + CSS @starting-style"
+  layer="1-2"
+  jsShipped="inline <script> only"
+>
+  <div class="flex gap-3 flex-wrap">
+    <button
+      id="open-dismissible"
+      class="bg-primary text-white border border-primary rounded-sm px-4 py-2 cursor-pointer hover:bg-primary-hover"
+      >Dismissible Dialog</button
+    >
+    <button
+      id="open-persistent"
+      class="bg-primary text-white border border-primary rounded-sm px-4 py-2 cursor-pointer hover:bg-primary-hover"
+      >Persistent Dialog</button
+    >
+  </div>
+
+  <!-- Dismissible: backdrop click + Esc close -->
+  <dialog
+    id="dialog-dismissible"
+    class="border border-border rounded-md p-8 max-w-[400px] bg-surface text-foreground"
+  >
+    <h2 class="mb-4">Dismissible Dialog</h2>
+    <p class="mb-4">
+      Backdrop click closes. Esc closes. This is the default behavior for
+      informational dialogs.
+    </p>
+    <button
+      class="dialog-close bg-primary text-white border border-primary rounded-sm px-4 py-2 cursor-pointer hover:bg-primary-hover"
+      >Close</button
+    >
+  </dialog>
+
+  <!-- Persistent: only close button works -->
+  <dialog
+    id="dialog-persistent"
+    class="border border-border rounded-md p-8 max-w-[400px] bg-surface text-foreground"
+  >
+    <h2 class="mb-4">Persistent Dialog</h2>
+    <p class="mb-4">
+      Backdrop click does <strong>not</strong> close. Esc does <strong
+        >not</strong
+      > close. The user must explicitly act. Use for confirmations, destructive actions,
+      or required input.
+    </p>
+    <div class="flex gap-3">
+      <button
+        class="dialog-close border border-border rounded-sm px-4 py-2 cursor-pointer hover:bg-surface-alt"
+        >Cancel</button
+      >
+      <button
+        class="dialog-close bg-primary text-white border border-primary rounded-sm px-4 py-2 cursor-pointer hover:bg-primary-hover"
+        >Confirm</button
+      >
+    </div>
+  </dialog>
+
+  <style>
+    dialog {
+      margin: auto;
+      opacity: 0;
+      transform: scale(0.95);
+      transition:
+        opacity 0.2s ease,
+        transform 0.2s ease,
+        display 0.2s ease allow-discrete,
+        overlay 0.2s ease allow-discrete;
+    }
+    dialog[open] {
+      opacity: 1;
+      transform: scale(1);
+    }
+    @starting-style {
+      dialog[open] {
+        opacity: 0;
+        transform: scale(0.95);
+      }
+    }
+
+    dialog::backdrop {
+      background: rgba(0, 0, 0, 0);
+      transition:
+        background 0.2s ease,
+        display 0.2s ease allow-discrete,
+        overlay 0.2s ease allow-discrete;
+    }
+    dialog[open]::backdrop {
+      background: rgba(0, 0, 0, 0.5);
+    }
+    @starting-style {
+      dialog[open]::backdrop {
+        background: rgba(0, 0, 0, 0);
+      }
+    }
+  </style>
+
+  <script>
+    document.addEventListener("astro:page-load", () => {
+      const dismissible = document.getElementById(
+        "dialog-dismissible",
+      ) as HTMLDialogElement | null;
+      const persistent = document.getElementById(
+        "dialog-persistent",
+      ) as HTMLDialogElement | null;
+      if (!dismissible || !persistent) return;
+
+      const openDismissible = document.getElementById("open-dismissible");
+      const openPersistent = document.getElementById("open-persistent");
+
+      // Open
+      openDismissible?.addEventListener("click", () => dismissible.showModal());
+      openPersistent?.addEventListener("click", () => persistent.showModal());
+
+      // Close buttons
+      document.querySelectorAll(".dialog-close").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          (btn.closest("dialog") as HTMLDialogElement).close();
+        });
+      });
+
+      // Dismissible: backdrop click closes
+      dismissible.addEventListener("click", (e) => {
+        if (e.target === dismissible) dismissible.close();
+      });
+
+      // Persistent: block Esc key
+      persistent.addEventListener("cancel", (e) => {
+        e.preventDefault();
+      });
+    });
+  </script>
+</PatternLayout>

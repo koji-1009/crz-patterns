@@ -1,0 +1,68 @@
+---
+import PatternLayout from "../../../layouts/PatternLayout.astro";
+---
+
+<PatternLayout
+  title="Multi-step Form — Step 1 of 3"
+  assumption="useState + Router for step management"
+  technique="sessionStorage for inter-step data + URL for current step"
+  layer="1"
+  jsShipped="inline <script> only"
+>
+  <p class="text-muted mb-4">Step 1: Basic Info</p>
+  <div class="grid gap-4 max-w-[400px]">
+    <label
+      >Name <input
+        type="text"
+        id="field-name"
+        value="John Doe"
+        class="border border-border rounded-sm p-2 bg-surface w-full mt-1"
+      /></label
+    >
+    <label
+      >Email <input
+        type="email"
+        id="field-email"
+        value="john@example.com"
+        class="border border-border rounded-sm p-2 bg-surface w-full mt-1"
+      /></label
+    >
+    <button
+      type="button"
+      id="next-btn"
+      class="bg-primary text-white border border-primary rounded-sm px-4 py-2 cursor-pointer hover:bg-primary-hover"
+      >Next &rarr;</button
+    >
+  </div>
+  <script>
+    import { navigate } from "astro:transitions/client";
+    const KEY = "multi-step";
+
+    document.addEventListener("astro:page-load", () => {
+      const nameEl = document.getElementById(
+        "field-name",
+      ) as HTMLInputElement | null;
+      const emailEl = document.getElementById(
+        "field-email",
+      ) as HTMLInputElement | null;
+      const btn = document.getElementById(
+        "next-btn",
+      ) as HTMLButtonElement | null;
+      if (!nameEl || !emailEl || !btn) return;
+
+      const saved = sessionStorage.getItem(KEY);
+      if (saved) {
+        const d = JSON.parse(saved);
+        nameEl.value = d.name ?? nameEl.value;
+        emailEl.value = d.email ?? emailEl.value;
+      }
+
+      btn.addEventListener("click", () => {
+        const prev = saved ? JSON.parse(saved) : {};
+        const data = { ...prev, name: nameEl.value, email: emailEl.value };
+        sessionStorage.setItem(KEY, JSON.stringify(data));
+        navigate(`${import.meta.env.BASE_URL}forms/multi-step/step2`);
+      });
+    });
+  </script>
+</PatternLayout>

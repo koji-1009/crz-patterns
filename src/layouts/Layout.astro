@@ -1,0 +1,72 @@
+---
+import "../styles/app.css";
+import { ClientRouter } from "astro:transitions";
+
+interface Props {
+  title: string;
+}
+const { title } = Astro.props;
+const base = import.meta.env.BASE_URL;
+---
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    <ClientRouter />
+    <script is:inline>
+      (function () {
+        var s = localStorage.getItem("theme-preference");
+        var d = window.matchMedia("(prefers-color-scheme: dark)").matches;
+        if (s === "dark" || (!s && d))
+          document.documentElement.classList.add("dark");
+      })();
+    </script>
+  </head>
+  <body class="bg-bg text-foreground">
+    <header
+      class="sticky top-0 z-10 bg-bg px-4 py-4 mb-6 border-b border-border flex items-center justify-between"
+    >
+      <a
+        href={base}
+        class="text-lg font-bold text-foreground no-underline hover:text-primary"
+        >CRZ Patterns</a
+      >
+      <button
+        id="theme-btn"
+        class="text-sm text-muted border border-border rounded-sm px-3 py-1 cursor-pointer hover:bg-surface-alt"
+        aria-label="Toggle dark mode"></button>
+    </header>
+    <div class="px-4">
+      <slot />
+    </div>
+    <footer
+      class="sticky bottom-0 z-10 bg-bg px-4 py-4 mt-12 border-t border-border text-sm text-muted"
+    >
+      Based on <a
+        href="https://github.com/koji-1009/crumple-zone-architecture"
+        class="text-primary">Crumple Zone Architecture</a
+      >
+      · Built with <a href="https://astro.build" class="text-primary">Astro</a>
+      + <a href="https://tailwindcss.com" class="text-primary">Tailwind CSS</a>
+    </footer>
+    <script is:inline>
+      document.addEventListener("astro:page-load", function () {
+        var btn = document.getElementById("theme-btn");
+        if (!btn) return;
+        function update() {
+          btn.textContent = document.documentElement.classList.contains("dark")
+            ? "Light"
+            : "Dark";
+        }
+        update();
+        btn.onclick = function () {
+          var dark = document.documentElement.classList.toggle("dark");
+          localStorage.setItem("theme-preference", dark ? "dark" : "light");
+          update();
+        };
+      });
+    </script>
+  </body>
+</html>

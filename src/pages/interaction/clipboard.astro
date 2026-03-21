@@ -1,0 +1,95 @@
+---
+import PatternLayout from "../../layouts/PatternLayout.astro";
+
+const cssSnippet = `.container {
+  display: grid;
+  gap: 1rem;
+  max-width: 960px;
+  margin: 0 auto;
+}`;
+---
+
+<PatternLayout
+  title="Clipboard Copy"
+  assumption="useState + useRef + document.execCommand"
+  technique="navigator.clipboard.writeText() + <script>"
+  layer="1"
+  jsShipped="inline <script> only"
+>
+  <style>
+    .copy-btn {
+      transition:
+        background-color 0.2s ease,
+        color 0.2s ease;
+    }
+    .copy-btn.copied {
+      background-color: var(--color-success);
+      color: #fff;
+      border-color: var(--color-success);
+    }
+  </style>
+
+  <div class="grid gap-4 max-w-[500px]">
+    <div class="copy-block">
+      <div class="flex items-center justify-between mb-1">
+        <span class="text-sm text-muted">JavaScript</span>
+        <button
+          class="copy-btn text-sm text-primary border border-border rounded-sm px-2 py-0.5 cursor-pointer hover:bg-surface-alt"
+          >Copy</button
+        >
+      </div>
+      <pre
+        class="copy-target p-4 bg-surface-alt rounded-sm overflow-x-auto text-sm">const greeting = "Hello, World!";
+console.log(greeting);</pre>
+    </div>
+
+    <div class="copy-block">
+      <div class="flex items-center justify-between mb-1">
+        <span class="text-sm text-muted">Shell</span>
+        <button
+          class="copy-btn text-sm text-primary border border-border rounded-sm px-2 py-0.5 cursor-pointer hover:bg-surface-alt"
+          >Copy</button
+        >
+      </div>
+      <pre
+        class="copy-target p-4 bg-surface-alt rounded-sm overflow-x-auto text-sm">npm create astro@latest
+cd my-project
+npm run dev</pre>
+    </div>
+
+    <div class="copy-block">
+      <div class="flex items-center justify-between mb-1">
+        <span class="text-sm text-muted">CSS</span>
+        <button
+          class="copy-btn text-sm text-primary border border-border rounded-sm px-2 py-0.5 cursor-pointer hover:bg-surface-alt"
+          >Copy</button
+        >
+      </div>
+      <pre
+        class="copy-target p-4 bg-surface-alt rounded-sm overflow-x-auto text-sm">{cssSnippet}</pre>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener("astro:page-load", () => {
+      document.querySelectorAll(".copy-block").forEach((block) => {
+        const btn = block.querySelector(
+          ".copy-btn",
+        ) as HTMLButtonElement | null;
+        const target = block.querySelector(
+          ".copy-target",
+        ) as HTMLElement | null;
+        if (!btn || !target) return;
+        btn.addEventListener("click", async () => {
+          await navigator.clipboard.writeText(target.textContent ?? "");
+          btn.textContent = "Copied!";
+          btn.classList.add("copied");
+          setTimeout(() => {
+            btn.textContent = "Copy";
+            btn.classList.remove("copied");
+          }, 2000);
+        });
+      });
+    });
+  </script>
+</PatternLayout>

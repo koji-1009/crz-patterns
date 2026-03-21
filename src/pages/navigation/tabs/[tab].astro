@@ -1,0 +1,47 @@
+---
+import TabPanel from "../../../components/TabPanel.astro";
+import PatternLayout from "../../../layouts/PatternLayout.astro";
+
+export function getStaticPaths() {
+  return [
+    { params: { tab: "a" } },
+    { params: { tab: "b" } },
+    { params: { tab: "c" } },
+  ];
+}
+
+const { tab } = Astro.params;
+const base = import.meta.env.BASE_URL;
+const tabs = ["a", "b", "c"];
+---
+
+<PatternLayout
+  title="Tabs"
+  assumption="useState + onClick handler"
+  technique="URL path + Astro component"
+  layer="1"
+  jsShipped="0 KB"
+>
+  <div
+    class="flex border-b-2 border-border"
+    role="tablist"
+    aria-label="Demo tabs"
+  >
+    {
+      tabs.map((t) => (
+        <a
+          href={`${base}navigation/tabs/${t}`}
+          role="tab"
+          class={
+            t === tab
+              ? "py-2 px-4 no-underline text-primary border-b-2 border-primary -mb-[2px]"
+              : "py-2 px-4 no-underline text-muted -mb-[2px] hover:text-foreground"
+          }
+        >
+          Tab {t.toUpperCase()}
+        </a>
+      ))
+    }
+  </div>
+  <TabPanel tab={tab!} />
+</PatternLayout>

@@ -1,0 +1,64 @@
+---
+import PatternLayout from "../../layouts/PatternLayout.astro";
+---
+
+<PatternLayout
+  title="Dark Mode"
+  assumption="ThemeProvider + Context + useState"
+  technique="CSS custom properties + localStorage + inline <script>"
+  layer="1-2"
+  jsShipped="inline <script> only"
+>
+  <p class="mb-4">
+    Use the <strong>Dark / Light</strong> button in the top-right corner. The preference
+    persists across all pages via <code>localStorage</code>.
+  </p>
+
+  <h3 class="mb-4">How It Works</h3>
+  <ol class="pl-6 list-decimal mb-6 space-y-1">
+    <li>
+      Inline <code>&lt;script&gt;</code> in <code>&lt;head&gt;</code> reads <code
+        >localStorage</code
+      > before paint — no flash
+    </li>
+    <li>Click toggles <code>.dark</code> class on <code>&lt;html&gt;</code></li>
+    <li>
+      CSS custom properties in <code>@theme</code> / <code>.dark</code> handle all
+      colors
+    </li>
+    <li>
+      Respects <code>prefers-color-scheme</code> as default when no preference is
+      stored
+    </li>
+  </ol>
+
+  <h3 class="mb-4">Sample Content</h3>
+  <div class="grid gap-4 max-w-[500px]">
+    <div class="p-4 bg-surface border border-border rounded-md">
+      <strong>Surface</strong> — bg-surface + border-border
+    </div>
+    <div class="p-4 bg-surface-alt rounded-md">
+      <strong>Surface Alt</strong> — bg-surface-alt
+    </div>
+    <div class="p-4 bg-primary text-white rounded-md">
+      <strong>Primary</strong> — bg-primary
+    </div>
+    <div class="p-4 bg-danger text-white rounded-md">
+      <strong>Danger</strong> — bg-danger
+    </div>
+    <div class="p-4 bg-success text-white rounded-md">
+      <strong>Success</strong> — bg-success
+    </div>
+    <p class="text-muted text-sm">
+      All these colors switch automatically based on the <code>.dark</code> class.
+      No per-component logic needed.
+    </p>
+  </div>
+
+  <!--
+    Demo note: This uses localStorage + JS class toggle.
+    Production CRZ pattern: store preference in a cookie, read server-side
+    in Layout frontmatter, and render <html data-theme={theme}> during SSR.
+    See Sieve skill "Dark Mode" section for the cookie-based approach.
+  -->
+</PatternLayout>

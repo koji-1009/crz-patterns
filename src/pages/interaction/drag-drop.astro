@@ -1,0 +1,129 @@
+---
+import PatternLayout from "../../layouts/PatternLayout.astro";
+---
+
+<PatternLayout
+  title="Drag & Drop Reorder"
+  assumption="dnd-kit / react-beautiful-dnd required"
+  technique="HTML5 Drag and Drop API (draggable, dragover, drop)"
+  layer="1"
+  jsShipped="inline <script> only"
+>
+  <div class="text-sm mb-6 p-3 border border-border rounded-sm bg-surface-alt">
+    <p class="font-semibold mb-2">Limitations of HTML5 Drag and Drop API</p>
+    <ul class="pl-5 list-disc space-y-1 text-muted">
+      <li>
+        <strong>No touch support</strong> — does not work on mobile/tablet. Touch
+        requires a library (dnd-kit, etc.)
+      </li>
+      <li>
+        <strong>Limited drag preview control</strong> — customizing the dragged element's
+        appearance is restricted
+      </li>
+      <li>
+        <strong>Drop target highlighting</strong> — managing dragenter/dragleave state
+        is verbose and error-prone
+      </li>
+      <li>
+        <strong>No keyboard accessibility</strong> — the API does not include keyboard-based
+        drag and drop
+      </li>
+    </ul>
+    <p class="mt-2 text-muted">
+      This demo shows that basic desktop reorder works without a framework or
+      library. When production requires rich DnD (touch, accessibility, custom
+      previews), adopting a library is a justified decision under CRZ
+      principles.
+    </p>
+  </div>
+
+  <style>
+    #sortable li {
+      transition:
+        opacity 0.2s ease,
+        transform 0.15s ease;
+    }
+    #sortable li:active {
+      cursor: grabbing;
+    }
+  </style>
+
+  <ul id="sortable" class="list-none p-0 max-w-[400px] grid gap-2">
+    <li
+      draggable="true"
+      class="flex items-center gap-3 py-3 px-4 bg-surface-alt border border-border rounded-sm cursor-grab"
+    >
+      <span class="pos font-mono text-muted text-sm w-6">1.</span>
+      <span>Apple</span>
+    </li>
+    <li
+      draggable="true"
+      class="flex items-center gap-3 py-3 px-4 bg-surface-alt border border-border rounded-sm cursor-grab"
+    >
+      <span class="pos font-mono text-muted text-sm w-6">2.</span>
+      <span>Banana</span>
+    </li>
+    <li
+      draggable="true"
+      class="flex items-center gap-3 py-3 px-4 bg-surface-alt border border-border rounded-sm cursor-grab"
+    >
+      <span class="pos font-mono text-muted text-sm w-6">3.</span>
+      <span>Cherry</span>
+    </li>
+    <li
+      draggable="true"
+      class="flex items-center gap-3 py-3 px-4 bg-surface-alt border border-border rounded-sm cursor-grab"
+    >
+      <span class="pos font-mono text-muted text-sm w-6">4.</span>
+      <span>Date</span>
+    </li>
+    <li
+      draggable="true"
+      class="flex items-center gap-3 py-3 px-4 bg-surface-alt border border-border rounded-sm cursor-grab"
+    >
+      <span class="pos font-mono text-muted text-sm w-6">5.</span>
+      <span>Elderberry</span>
+    </li>
+  </ul>
+
+  <script>
+    document.addEventListener("astro:page-load", () => {
+      let dragged: HTMLElement | null = null;
+      const list = document.getElementById(
+        "sortable",
+      ) as HTMLUListElement | null;
+      if (!list) return;
+
+      function updatePositions() {
+        list!.querySelectorAll(".pos").forEach((el, i) => {
+          el.textContent = `${i + 1}.`;
+        });
+      }
+
+      list.addEventListener("dragstart", (e) => {
+        dragged = e.target as HTMLElement;
+        dragged.style.opacity = "0.4";
+      });
+
+      list.addEventListener("dragend", (e) => {
+        (e.target as HTMLElement).style.opacity = "1";
+        dragged = null;
+        updatePositions();
+      });
+
+      list.addEventListener("dragover", (e) => {
+        e.preventDefault();
+        const target = (e.target as HTMLElement).closest("li");
+        if (target && dragged && target !== dragged) {
+          const rect = target.getBoundingClientRect();
+          const mid = rect.top + rect.height / 2;
+          if (e.clientY < mid) {
+            list.insertBefore(dragged, target);
+          } else {
+            list.insertBefore(dragged, target.nextSibling);
+          }
+        }
+      });
+    });
+  </script>
+</PatternLayout>

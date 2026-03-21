@@ -1,0 +1,111 @@
+---
+import PatternLayout from "../../layouts/PatternLayout.astro";
+---
+
+<PatternLayout
+  title="Toast Notification"
+  assumption="react-toastify / state + portal + timer"
+  technique="Popover API (top layer) + CSS transition"
+  layer="1-2"
+  jsShipped="inline <script> only"
+>
+  <div class="flex gap-3 flex-wrap">
+    <button
+      class="toast-btn bg-success text-white border border-success rounded-sm px-4 py-2 cursor-pointer"
+      data-type="success">Success</button
+    >
+    <button
+      class="toast-btn bg-danger text-white border border-danger rounded-sm px-4 py-2 cursor-pointer"
+      data-type="error">Error</button
+    >
+    <button
+      class="toast-btn bg-primary text-white border border-primary rounded-sm px-4 py-2 cursor-pointer"
+      data-type="info">Info</button
+    >
+  </div>
+
+  <div
+    id="toast"
+    class="toast"
+    popover="manual"
+    role="alert"
+    aria-live="assertive"
+  >
+    <span id="toast-icon"></span>
+    <span id="toast-msg"></span>
+  </div>
+
+  <style>
+    .toast {
+      position: fixed;
+      top: 0.5rem;
+      left: 50%;
+      transform: translateX(-50%) translateY(-1rem);
+      margin: 0;
+      border: none;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 1rem 1.5rem;
+      border-radius: 8px;
+      color: #fff;
+      font-weight: 500;
+      opacity: 0;
+      transition:
+        opacity 0.3s ease,
+        transform 0.3s ease,
+        display 0.3s ease allow-discrete,
+        overlay 0.3s ease allow-discrete;
+    }
+    .toast:popover-open {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+    @starting-style {
+      .toast:popover-open {
+        opacity: 0;
+        transform: translateX(-50%) translateY(-1rem);
+      }
+    }
+    .toast.success {
+      background: var(--color-success);
+    }
+    .toast.error {
+      background: var(--color-danger);
+    }
+    .toast.info {
+      background: var(--color-primary);
+    }
+  </style>
+
+  <script>
+    const config: Record<string, { icon: string; text: string }> = {
+      success: { icon: "\u2713", text: "Action completed successfully." },
+      error: { icon: "!", text: "Something went wrong." },
+      info: { icon: "\u2139", text: "Notification sent." },
+    };
+
+    let timer: ReturnType<typeof setTimeout>;
+
+    document.addEventListener("astro:page-load", () => {
+      const toast = document.getElementById("toast") as HTMLElement | null;
+      const icon = document.getElementById("toast-icon") as HTMLElement | null;
+      const msg = document.getElementById("toast-msg") as HTMLElement | null;
+      if (!toast || !icon || !msg) return;
+
+      document.querySelectorAll(".toast-btn").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          clearTimeout(timer);
+          const type = (btn as HTMLElement).dataset.type!;
+          const c = config[type]!;
+          toast.className = "toast";
+          toast.classList.add(type);
+          icon.textContent = c.icon;
+          msg.textContent = c.text;
+          toast.showPopover();
+          timer = setTimeout(() => toast.hidePopover(), 3000);
+        });
+      });
+    });
+  </script>
+</PatternLayout>

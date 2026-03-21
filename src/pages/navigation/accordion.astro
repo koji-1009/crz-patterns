@@ -1,0 +1,99 @@
+---
+import PatternLayout from "../../layouts/PatternLayout.astro";
+---
+
+<PatternLayout
+  title="Accordion"
+  assumption="useState + toggle function"
+  technique="<details> / <summary> + CSS interpolate-size"
+  layer="1-2"
+  jsShipped="0 KB"
+>
+  <style>
+    .accordion-item {
+      interpolate-size: allow-keywords;
+    }
+    .accordion-item ::details-content {
+      height: 0;
+      overflow: hidden;
+      transition: height 0.3s ease;
+    }
+    .accordion-item[open] ::details-content {
+      height: auto;
+    }
+  </style>
+
+  <div class="grid gap-2 max-w-[600px]">
+    <details open class="accordion-item border border-border rounded-sm">
+      <summary class="cursor-pointer p-3 bg-surface-alt font-semibold"
+        >What is Crumple Zone Architecture?</summary
+      >
+      <div class="p-3 text-sm leading-relaxed">
+        <p>
+          CRZ is an architectural approach for web applications that prioritizes
+          reliability by layering features according to their failure
+          characteristics. HTML and browser APIs form the foundation (Layer 1),
+          CSS provides visual enhancements (Layer 2), and JavaScript islands add
+          interactivity only when strictly necessary (Layers 3-4).
+        </p>
+        <p class="mt-2">
+          The name comes from automobile crumple zones — sacrificial structures
+          that absorb impact to protect what matters most.
+        </p>
+      </div>
+    </details>
+    <details class="accordion-item border border-border rounded-sm">
+      <summary class="cursor-pointer p-3 bg-surface-alt font-semibold"
+        >Why avoid global state libraries?</summary
+      >
+      <div class="p-3 text-sm leading-relaxed">
+        <p>
+          Global state libraries (Redux, Zustand, Pinia) create a single point
+          of failure in the JavaScript layer. If the JS runtime breaks, all
+          state is lost. CRZ distributes state across canonical sources: URLs
+          for view state, cookies for auth, sessionStorage for drafts, and
+          server-side DB for persistent data.
+        </p>
+        <p class="mt-2">
+          Each canonical source has a different failure mode, so a single
+          failure cannot cascade to destroy all state.
+        </p>
+      </div>
+    </details>
+    <details class="accordion-item border border-border rounded-sm">
+      <summary class="cursor-pointer p-3 bg-surface-alt font-semibold"
+        >When should I use an island?</summary
+      >
+      <div class="p-3 text-sm leading-relaxed">
+        <p>
+          Only when the component requires local state that cannot be expressed
+          through HTML, CSS, URL params, or a <code>&lt;script&gt;</code> tag. Common
+          valid cases: forms with dynamic validation, real-time calculations, and
+          browser-native APIs like Geolocation.
+        </p>
+        <p class="mt-2">
+          Before creating an island, list every <code>useState</code> call. If each
+          value can be a server prop, URL param, HTML attribute, CSS rule, or DOM
+          call — the island is unnecessary.
+        </p>
+      </div>
+    </details>
+    <details class="accordion-item border border-border rounded-sm">
+      <summary class="cursor-pointer p-3 bg-surface-alt font-semibold"
+        >How does the PRG pattern work?</summary
+      >
+      <div class="p-3 text-sm leading-relaxed">
+        <p>
+          Post-Redirect-Get: the form submits via POST, the server processes it,
+          stores the result in a session, and responds with a 302 redirect. The
+          browser follows the redirect to a GET request. This means reloading
+          the page will not trigger a "resubmit form?" warning.
+        </p>
+        <p class="mt-2">
+          This is a Layer 1 pattern — no JavaScript required. The browser's
+          native form submission and HTTP redirect handle everything.
+        </p>
+      </div>
+    </details>
+  </div>
+</PatternLayout>

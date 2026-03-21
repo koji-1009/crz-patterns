@@ -1,0 +1,57 @@
+@import "tailwindcss";
+
+@theme {
+  /* Color — semantic (light) */
+  --color-bg: #fafafa;
+  --color-foreground: #1a1a1a;
+  --color-muted: #666666;
+  --color-border: #dddddd;
+  --color-primary: #2563eb;
+  --color-primary-hover: #1d4ed8;
+  --color-surface: #ffffff;
+  --color-surface-alt: #f0f0f0;
+  --color-danger: #dc2626;
+  --color-success: #16a34a;
+
+  /* Typography */
+  --font-sans: system-ui, -apple-system, sans-serif;
+  --font-mono: ui-monospace, monospace;
+
+  /* Shape */
+  --radius-sm: 4px;
+  --radius-md: 8px;
+}
+
+/* Dark mode overrides */
+.dark {
+  --color-bg: #111111;
+  --color-foreground: #e5e5e5;
+  --color-muted: #999999;
+  --color-border: #333333;
+  --color-primary: #60a5fa;
+  --color-primary-hover: #93bbfd;
+  --color-surface: #1a1a1a;
+  --color-surface-alt: #222222;
+  --color-danger: #f87171;
+  --color-success: #4ade80;
+}
+
+/* Base */
+html {
+  scroll-behavior: smooth;
+  font-family: var(--font-sans);
+}
+
+body {
+  max-width: 960px;
+  margin: 0 auto;
+  min-height: 100vh;
+}
+
+a {
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}

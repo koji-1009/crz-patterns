@@ -1,0 +1,33 @@
+---
+interface Props {
+  tab: string;
+}
+const { tab } = Astro.props;
+
+const panels: Record<string, { title: string; content: string }> = {
+  a: {
+    title: "Panel A",
+    content: "Content for Tab A. This is the default tab.",
+  },
+  b: {
+    title: "Panel B",
+    content:
+      "Content for Tab B. Each tab is a separate URL — shareable, bookmarkable.",
+  },
+  c: {
+    title: "Panel C",
+    content:
+      "Content for Tab C. Direct link works. Back button works. No JS needed.",
+  },
+};
+
+const panel = panels[tab] ?? panels.a!;
+---
+
+<section
+  class="p-4 border border-border border-t-0 rounded-b-sm"
+  role="tabpanel"
+>
+  <h3>{panel.title}</h3>
+  <p>{panel.content}</p>
+</section>

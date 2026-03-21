@@ -1,0 +1,318 @@
+---
+import PatternLayout from "../../layouts/PatternLayout.astro";
+const base = import.meta.env.BASE_URL;
+---
+
+<PatternLayout
+  title="Loading Overlay"
+  assumption="isLoading useState + Suspense + portal"
+  technique="CSS overlay + <script> state transition + URL canonical source"
+  layer="1-2"
+  jsShipped="inline <script> only"
+>
+  <p class="text-muted mb-6 text-sm border-l-2 border-muted pl-3">
+    Full-screen blocking overlay should be reserved for operations where the
+    user must wait (payment, destructive action, export). For data loading,
+    prefer partial indicators or browser-native navigation.
+  </p>
+
+  <!-- Default state: action form -->
+  <div id="state-idle">
+    <h3 class="mb-4">Action Settings</h3>
+    <div class="grid gap-4 max-w-[400px]">
+      <label>
+        Delay
+        <select
+          id="cfg-delay"
+          class="block mt-1 border border-border rounded-sm p-2 bg-surface w-full"
+        >
+          <option value="300">300ms</option>
+          <option value="1000" selected>1 sec</option>
+          <option value="3000">3 sec</option>
+        </select>
+      </label>
+      <label>
+        Result
+        <select
+          id="cfg-result"
+          class="block mt-1 border border-border rounded-sm p-2 bg-surface w-full"
+        >
+          <option value="success">Success</option>
+          <option value="error">Error (ActionError)</option>
+        </select>
+      </label>
+      <label>
+        After completion
+        <select
+          id="cfg-after"
+          class="block mt-1 border border-border rounded-sm p-2 bg-surface w-full"
+        >
+          <option value="overlay">Show in overlay, then close</option>
+          <option value="navigate"
+            >Navigate with ?status= (URL canonical)</option
+          >
+        </select>
+      </label>
+      <button
+        id="execute-btn"
+        class="bg-primary text-white border border-primary rounded-sm px-4 py-2 cursor-pointer hover:bg-primary-hover"
+        >Execute Action</button
+      >
+    </div>
+  </div>
+
+  <!-- URL-driven completion state -->
+  <div id="state-complete" class="hidden">
+    <div class="p-6 bg-surface-alt rounded-md max-w-[400px]">
+      <div class="flex items-center gap-3 mb-4">
+        <span
+          class="inline-flex items-center justify-center w-10 h-10 rounded-full bg-success text-white text-xl"
+          >&#10003;</span
+        >
+        <h3>Action Complete</h3>
+      </div>
+      <p class="text-muted mb-4">
+        The action has been processed. This state is derived from <code
+          >?status=complete</code
+        > in the URL.
+      </p>
+      <p class="text-muted text-sm mb-4">
+        Reload the page — the completion state persists because the URL is the
+        canonical source.
+      </p>
+      <a
+        href={`${base}components/loading-overlay`}
+        class="inline-block bg-primary text-white border border-primary rounded-sm px-4 py-2 no-underline hover:bg-primary-hover"
+        >Reset</a
+      >
+    </div>
+  </div>
+
+  <!-- URL-driven error state -->
+  <div id="state-error" class="hidden">
+    <div class="p-6 border border-danger rounded-md max-w-[400px]">
+      <div class="flex items-center gap-3 mb-4">
+        <span
+          class="inline-flex items-center justify-center w-10 h-10 rounded-full bg-danger text-white text-xl"
+          >!</span
+        >
+        <h3>Action Failed</h3>
+      </div>
+      <p class="text-muted mb-4">
+        An error occurred during processing. This state is derived from <code
+          >?status=error</code
+        > in the URL.
+      </p>
+      <a
+        href={`${base}components/loading-overlay`}
+        class="inline-block bg-primary text-white border border-primary rounded-sm px-4 py-2 no-underline hover:bg-primary-hover"
+        >Retry</a
+      >
+    </div>
+  </div>
+
+  <!-- Overlay -->
+  <dialog id="overlay" class="overlay">
+    <div id="ol-loading" class="overlay-state">
+      <div class="spinner"></div>
+      <p class="mt-4 text-lg">Processing...</p>
+    </div>
+    <div id="ol-success" class="overlay-state hidden">
+      <div class="checkmark">&#10003;</div>
+      <p class="mt-4 text-lg">Complete!</p>
+      <button
+        id="ol-close-success"
+        class="mt-6 px-4 py-2 border border-white rounded-sm text-white cursor-pointer hover:bg-white/20"
+        >Close</button
+      >
+    </div>
+    <div id="ol-error" class="overlay-state hidden">
+      <div class="errormark">!</div>
+      <p class="mt-4 text-lg">Error: ActionError</p>
+      <p class="mt-1 text-sm opacity-75">INTERNAL_SERVER_ERROR</p>
+      <button
+        id="ol-close-error"
+        class="mt-6 px-4 py-2 border border-white rounded-sm text-white cursor-pointer hover:bg-white/20"
+        >Dismiss</button
+      >
+    </div>
+  </dialog>
+
+  <style>
+    .overlay {
+      border: none;
+      background: transparent;
+      color: #fff;
+      margin: auto;
+      max-width: 100vw;
+      max-height: 100vh;
+    }
+    .overlay::backdrop {
+      background: rgba(0, 0, 0, 0.6);
+    }
+    .overlay-state {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .overlay-state.hidden {
+      display: none;
+    }
+    .spinner {
+      width: 48px;
+      height: 48px;
+      border: 4px solid rgba(255, 255, 255, 0.3);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+    .checkmark {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      background: #16a34a;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      animation: pop 0.3s ease;
+    }
+    .errormark {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      background: #dc2626;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      font-weight: bold;
+      animation: pop 0.3s ease;
+    }
+    @keyframes pop {
+      0% {
+        transform: scale(0);
+      }
+      80% {
+        transform: scale(1.1);
+      }
+      100% {
+        transform: scale(1);
+      }
+    }
+  </style>
+
+  <script>
+    import { navigate } from "astro:transitions/client";
+
+    document.addEventListener("astro:page-load", () => {
+      const idle = document.getElementById("state-idle") as HTMLElement | null;
+      const stateComplete = document.getElementById(
+        "state-complete",
+      ) as HTMLElement | null;
+      const stateError = document.getElementById(
+        "state-error",
+      ) as HTMLElement | null;
+      const overlay = document.getElementById(
+        "overlay",
+      ) as HTMLDialogElement | null;
+      const olLoading = document.getElementById(
+        "ol-loading",
+      ) as HTMLElement | null;
+      const olSuccess = document.getElementById(
+        "ol-success",
+      ) as HTMLElement | null;
+      const olError = document.getElementById("ol-error") as HTMLElement | null;
+      const cfgDelay = document.getElementById(
+        "cfg-delay",
+      ) as HTMLSelectElement | null;
+      const cfgResult = document.getElementById(
+        "cfg-result",
+      ) as HTMLSelectElement | null;
+      const cfgAfter = document.getElementById(
+        "cfg-after",
+      ) as HTMLSelectElement | null;
+      const execBtn = document.getElementById(
+        "execute-btn",
+      ) as HTMLButtonElement | null;
+      if (
+        !idle ||
+        !stateComplete ||
+        !stateError ||
+        !overlay ||
+        !olLoading ||
+        !olSuccess ||
+        !olError ||
+        !cfgDelay ||
+        !cfgResult ||
+        !cfgAfter ||
+        !execBtn
+      )
+        return;
+
+      // URL-driven state: check on load
+      const status = new URLSearchParams(window.location.search).get("status");
+      if (status === "complete") {
+        idle.classList.add("hidden");
+        stateComplete.classList.remove("hidden");
+      } else if (status === "error") {
+        idle.classList.add("hidden");
+        stateError.classList.remove("hidden");
+      }
+
+      // Block Esc during processing
+      overlay.addEventListener("cancel", (e) => e.preventDefault());
+
+      function showOverlay() {
+        olLoading!.classList.remove("hidden");
+        olSuccess!.classList.add("hidden");
+        olError!.classList.add("hidden");
+        overlay!.showModal();
+      }
+
+      function hideOverlay() {
+        overlay!.close();
+      }
+
+      function showOverlayResult(success: boolean) {
+        olLoading!.classList.add("hidden");
+        if (success) {
+          olSuccess!.classList.remove("hidden");
+        } else {
+          olError!.classList.remove("hidden");
+        }
+      }
+
+      execBtn.addEventListener("click", () => {
+        const delay = Number(cfgDelay!.value);
+        const result = cfgResult!.value;
+        const after = cfgAfter!.value;
+
+        showOverlay();
+
+        setTimeout(() => {
+          const success = result === "success";
+
+          if (after === "navigate") {
+            hideOverlay();
+            navigate(`?status=${success ? "complete" : "error"}`);
+          } else {
+            showOverlayResult(success);
+          }
+        }, delay);
+      });
+
+      document
+        .getElementById("ol-close-success")
+        ?.addEventListener("click", hideOverlay);
+      document
+        .getElementById("ol-close-error")
+        ?.addEventListener("click", hideOverlay);
+    });
+  </script>
+</PatternLayout>

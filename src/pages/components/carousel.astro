@@ -1,0 +1,47 @@
+---
+import PatternLayout from "../../layouts/PatternLayout.astro";
+const cards = [
+  { id: 1, title: "Mountains", seed: "mountain" },
+  { id: 2, title: "Ocean", seed: "ocean" },
+  { id: 3, title: "Forest", seed: "forest" },
+  { id: 4, title: "Desert", seed: "desert" },
+  { id: 5, title: "City", seed: "city" },
+  { id: 6, title: "River", seed: "river" },
+  { id: 7, title: "Snow", seed: "snow" },
+  { id: 8, title: "Sunset", seed: "sunset" },
+];
+---
+
+<PatternLayout
+  title="Carousel / Horizontal Scroll"
+  assumption="Swiper.js / useState + ref + scroll handler"
+  technique="CSS overflow-x: auto + scroll-snap-type"
+  layer="2"
+  jsShipped="0 KB"
+>
+  <div class="flex gap-4 overflow-x-auto snap-x snap-mandatory py-4 -mx-4 px-4">
+    {
+      cards.map((card) => (
+        <div class="flex-none w-[250px] snap-start rounded-md overflow-hidden border border-border bg-surface">
+          <img
+            src={`https://picsum.photos/seed/${card.seed}/250/150`}
+            alt={card.title}
+            width="250"
+            height="150"
+            loading="lazy"
+            class="w-full h-[150px] object-cover"
+          />
+          <div class="p-4">
+            <h3 class="font-semibold">{card.title}</h3>
+            <p class="text-sm text-muted mt-1">
+              Card {card.id} of {cards.length}
+            </p>
+          </div>
+        </div>
+      ))
+    }
+  </div>
+  <p class="text-muted text-sm mt-2">
+    Scroll horizontally. Snaps to each card. Works with touch swipe and mouse.
+  </p>
+</PatternLayout>

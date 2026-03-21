@@ -1,0 +1,51 @@
+---
+import PatternLayout from "../../layouts/PatternLayout.astro";
+const base = import.meta.env.BASE_URL;
+---
+
+<PatternLayout
+  title="Draft Persistence — Other Page"
+  assumption="state management library + Context required"
+  technique="sessionStorage + <script>"
+  layer="1"
+  jsShipped="0 KB"
+>
+  <div class="max-w-[500px]">
+    <h3 class="mb-4">You navigated away!</h3>
+    <p class="mb-4">
+      This is a different page. In a real application, this could be a settings
+      page, a help article, or any other destination the user browses to
+      mid-form.
+    </p>
+    <p class="mb-4">
+      Your draft data is preserved in <code>sessionStorage</code>. It survives
+      navigation within the same tab but is cleared when the tab is closed.
+    </p>
+    <div class="p-4 bg-surface-alt rounded-sm mb-4">
+      <p class="text-sm text-muted" id="draft-status"></p>
+    </div>
+    <a
+      href={`${base}forms/draft`}
+      class="inline-block bg-primary text-white border border-primary rounded-sm px-4 py-2 no-underline hover:bg-primary-hover"
+      >← Back to form</a
+    >
+  </div>
+
+  <script>
+    document.addEventListener("astro:page-load", () => {
+      const status = document.getElementById(
+        "draft-status",
+      ) as HTMLElement | null;
+      if (!status) return;
+      const saved = sessionStorage.getItem("draft-form-data");
+      if (saved) {
+        const data = JSON.parse(saved);
+        const fields = Object.entries(data).filter(([, v]) => v).length;
+        status.textContent = `Draft found: ${fields} field(s) saved. Go back to see them restored.`;
+      } else {
+        status.textContent =
+          "No draft found. Fill in the form first, then navigate here.";
+      }
+    });
+  </script>
+</PatternLayout>

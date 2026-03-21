@@ -1,0 +1,82 @@
+---
+import PatternLayout from "../../../layouts/PatternLayout.astro";
+const base = import.meta.env.BASE_URL;
+---
+
+<PatternLayout
+  title="Multi-step Form — Step 2 of 3"
+  assumption="useState + Router for step management"
+  technique="sessionStorage for inter-step data + URL for current step"
+  layer="1"
+  jsShipped="inline <script> only"
+>
+  <p class="text-muted mb-4">Step 2: Contact Details</p>
+  <div id="step1-summary" class="p-3 bg-surface-alt rounded-sm mb-4 text-sm">
+  </div>
+  <div class="grid gap-4 max-w-[400px]">
+    <label
+      >Address <input
+        type="text"
+        id="field-address"
+        value="123 Main St"
+        class="border border-border rounded-sm p-2 bg-surface w-full mt-1"
+      /></label
+    >
+    <label
+      >Phone <input
+        type="tel"
+        id="field-phone"
+        value="090-1234-5678"
+        class="border border-border rounded-sm p-2 bg-surface w-full mt-1"
+      /></label
+    >
+    <div class="flex gap-4">
+      <a
+        href={`${base}forms/multi-step/step1`}
+        class="px-4 py-2 border border-border rounded-sm">&larr; Back</a
+      >
+      <button
+        type="button"
+        id="next-btn"
+        class="bg-primary text-white border border-primary rounded-sm px-4 py-2 cursor-pointer hover:bg-primary-hover"
+        >Next &rarr;</button
+      >
+    </div>
+  </div>
+  <script>
+    import { navigate } from "astro:transitions/client";
+    const KEY = "multi-step";
+
+    document.addEventListener("astro:page-load", () => {
+      const summary = document.getElementById(
+        "step1-summary",
+      ) as HTMLElement | null;
+      const addressEl = document.getElementById(
+        "field-address",
+      ) as HTMLInputElement | null;
+      const phoneEl = document.getElementById(
+        "field-phone",
+      ) as HTMLInputElement | null;
+      const btn = document.getElementById(
+        "next-btn",
+      ) as HTMLButtonElement | null;
+      if (!summary || !addressEl || !phoneEl || !btn) return;
+
+      const saved = sessionStorage.getItem(KEY);
+      if (!saved) {
+        navigate(`${import.meta.env.BASE_URL}forms/multi-step/step1`);
+        return;
+      }
+      const d = JSON.parse(saved);
+      summary.textContent = `Step 1: ${d.name ?? ""} / ${d.email ?? ""}`;
+      if (d.address) addressEl.value = d.address;
+      if (d.phone) phoneEl.value = d.phone;
+
+      btn.addEventListener("click", () => {
+        const data = { ...d, address: addressEl.value, phone: phoneEl.value };
+        sessionStorage.setItem(KEY, JSON.stringify(data));
+        navigate(`${import.meta.env.BASE_URL}forms/multi-step/step3`);
+      });
+    });
+  </script>
+</PatternLayout>

@@ -1,0 +1,64 @@
+---
+import PatternLayout from "../../layouts/PatternLayout.astro";
+---
+
+<PatternLayout
+  title="Tooltip"
+  assumption="Tippy.js / Floating UI + useState"
+  technique="CSS :hover + ::after with content attribute / HTML title"
+  layer="1-2"
+  jsShipped="0 KB"
+>
+  <div class="flex gap-8 flex-wrap py-8">
+    <span
+      class="tooltip-css"
+      data-tooltip="This is a CSS tooltip using ::after"
+    >
+      CSS tooltip (hover me)
+    </span>
+
+    <span title="This is a native HTML title tooltip">
+      HTML title (hover me)
+    </span>
+
+    <span
+      class="tooltip-rich"
+      data-tooltip="Rich tooltip
+with multiple lines
+and formatting"
+    >
+      Rich CSS tooltip (hover me)
+    </span>
+  </div>
+
+  <style>
+    .tooltip-css,
+    .tooltip-rich {
+      position: relative;
+      text-decoration: underline dotted;
+      cursor: help;
+    }
+    .tooltip-css::after,
+    .tooltip-rich::after {
+      content: attr(data-tooltip);
+      position: absolute;
+      bottom: 100%;
+      left: 50%;
+      transform: translateX(-50%);
+      padding: 0.5rem 0.75rem;
+      background: var(--color-foreground);
+      color: var(--color-bg);
+      border-radius: 4px;
+      font-size: 0.8rem;
+      white-space: pre;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.2s;
+      margin-bottom: 0.25rem;
+    }
+    .tooltip-css:hover::after,
+    .tooltip-rich:hover::after {
+      opacity: 1;
+    }
+  </style>
+</PatternLayout>

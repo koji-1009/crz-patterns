@@ -1,0 +1,90 @@
+---
+import PatternLayout from "../../layouts/PatternLayout.astro";
+const base = import.meta.env.BASE_URL;
+---
+
+<PatternLayout
+  title="Draft Persistence"
+  assumption="state management library + Context required"
+  technique="sessionStorage + <script>"
+  layer="1"
+  jsShipped="inline <script> only"
+>
+  <form id="draft-form" method="post" action="/forms/draft">
+    <div class="grid gap-4 max-w-[400px]">
+      <label
+        >Name <input
+          type="text"
+          name="name"
+          class="border border-border rounded-sm p-2 bg-surface w-full mt-1"
+        /></label
+      >
+      <label
+        >Email <input
+          type="email"
+          name="email"
+          class="border border-border rounded-sm p-2 bg-surface w-full mt-1"
+        /></label
+      >
+      <label
+        >Message <textarea
+          name="message"
+          rows="3"
+          class="border border-border rounded-sm p-2 bg-surface w-full mt-1"
+        ></textarea></label
+      >
+      <button
+        type="submit"
+        class="bg-primary text-white border border-primary rounded-sm px-4 py-2 cursor-pointer hover:bg-primary-hover disabled:opacity-60 disabled:cursor-not-allowed"
+        >Submit</button
+      >
+    </div>
+  </form>
+  <p class="mt-4"><a href={`${base}forms/draft-away`}>Navigate away →</a></p>
+
+  <script>
+    const KEY = "draft-form-data";
+
+    document.addEventListener("astro:page-load", () => {
+      const form = document.getElementById(
+        "draft-form",
+      ) as HTMLFormElement | null;
+      if (!form) return;
+
+      // Restore
+      const saved = sessionStorage.getItem(KEY);
+      if (saved) {
+        const data = JSON.parse(saved);
+        for (const [name, value] of Object.entries(data)) {
+          const el = form.elements.namedItem(name);
+          if (
+            el instanceof HTMLInputElement ||
+            el instanceof HTMLTextAreaElement
+          ) {
+            el.value = value as string;
+          }
+        }
+      }
+
+      // Save on input
+      form.addEventListener("input", () => {
+        const data: Record<string, string> = {};
+        for (const el of form.elements) {
+          if (
+            (el instanceof HTMLInputElement ||
+              el instanceof HTMLTextAreaElement) &&
+            el.name
+          ) {
+            data[el.name] = el.value;
+          }
+        }
+        sessionStorage.setItem(KEY, JSON.stringify(data));
+      });
+
+      // Clear on submit
+      form.addEventListener("submit", () => {
+        sessionStorage.removeItem(KEY);
+      });
+    });
+  </script>
+</PatternLayout>

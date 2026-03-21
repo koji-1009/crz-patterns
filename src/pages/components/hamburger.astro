@@ -1,0 +1,145 @@
+---
+import PatternLayout from "../../layouts/PatternLayout.astro";
+---
+
+<PatternLayout
+  title="Hamburger Menu"
+  assumption="useState + toggle + CSS animation + click-outside"
+  technique="<details> + CSS container query + ::details-content animation"
+  layer="1-2"
+  jsShipped="0 KB"
+>
+  <p class="text-muted mb-6 text-sm">
+    Two previews below: wide (md+) shows inline links, narrow (&lt;md) shows
+    hamburger. Both are live — try clicking the hamburger icon.
+  </p>
+
+  <h3 class="mb-2">Wide (md+ / 768px~)</h3>
+  <div class="demo-container wide mb-8">
+    <nav class="hamburger-nav">
+      <span class="brand">Brand</span>
+      <div class="nav-links-wide">
+        <a href="#">Link A</a>
+        <a href="#">Link B</a>
+        <a href="#">Link C</a>
+      </div>
+      <details class="hamburger">
+        <summary aria-label="Menu">&#9776;</summary>
+        <div class="dropdown">
+          <a href="#">Link A</a>
+          <a href="#">Link B</a>
+          <a href="#">Link C</a>
+        </div>
+      </details>
+    </nav>
+  </div>
+
+  <h3 class="mb-2">Narrow (&lt;md / ~375px)</h3>
+  <div class="demo-container narrow mb-4">
+    <nav class="hamburger-nav">
+      <span class="brand">Brand</span>
+      <div class="nav-links-wide">
+        <a href="#">Link A</a>
+        <a href="#">Link B</a>
+        <a href="#">Link C</a>
+      </div>
+      <details class="hamburger">
+        <summary aria-label="Menu">&#9776;</summary>
+        <div class="dropdown">
+          <a href="#">Link A</a>
+          <a href="#">Link B</a>
+          <a href="#">Link C</a>
+        </div>
+      </details>
+    </nav>
+  </div>
+
+  <style>
+    .demo-container {
+      container-type: inline-size;
+      border: 1px solid var(--color-border);
+      border-radius: 8px;
+      overflow: visible;
+      position: relative;
+    }
+    .demo-container.wide {
+      width: 100%;
+    }
+    .demo-container.narrow {
+      width: 375px;
+      max-width: 100%;
+    }
+
+    .hamburger-nav {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 0.75rem 1rem;
+      background: var(--color-surface-alt);
+      border-radius: 8px;
+    }
+    .brand {
+      font-weight: 700;
+      margin-right: auto;
+    }
+    .nav-links-wide {
+      display: flex;
+      gap: 1rem;
+    }
+    .hamburger {
+      display: none;
+      position: relative;
+      interpolate-size: allow-keywords;
+    }
+    .hamburger ::details-content {
+      height: 0;
+      overflow: hidden;
+      opacity: 0;
+      transition:
+        height 0.2s ease,
+        opacity 0.2s ease;
+    }
+    .hamburger[open] ::details-content {
+      height: auto;
+      opacity: 1;
+    }
+    .hamburger summary {
+      cursor: pointer;
+      font-size: 1.5rem;
+      list-style: none;
+    }
+    .hamburger summary::-webkit-details-marker {
+      display: none;
+    }
+    .hamburger .dropdown {
+      position: absolute;
+      right: 0;
+      top: 100%;
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: 4px;
+      padding: 0.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+      min-width: 150px;
+    }
+    .hamburger .dropdown a {
+      padding: 0.5rem;
+      border-radius: 4px;
+    }
+    .hamburger .dropdown a:hover {
+      background: var(--color-surface-alt);
+    }
+
+    /* Container query: switch at md equivalent (768px) */
+    @container (max-width: 767px) {
+      .nav-links-wide {
+        display: none;
+      }
+      .hamburger {
+        display: block;
+      }
+    }
+  </style>
+</PatternLayout>

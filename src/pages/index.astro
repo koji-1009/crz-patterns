@@ -1,0 +1,168 @@
+---
+import Layout from "../layouts/Layout.astro";
+const base = import.meta.env.BASE_URL;
+---
+
+<Layout title="CRZ Pattern Catalog">
+  <main>
+    <section>
+      <h2
+        class="mt-8 mb-3 text-sm text-muted uppercase tracking-wide font-bold"
+      >
+        Forms & Input
+      </h2>
+      <a
+        class="flex justify-between items-center px-4 py-3 border border-border rounded-sm bg-surface hover:border-primary hover:no-underline mb-2 block"
+        href={`${base}forms/draft`}
+      >
+        <strong>Draft Persistence</strong>
+        <span class="text-xs text-muted text-right"
+          >Layer 1 / inline &lt;script&gt; only</span
+        >
+      </a>
+      <a
+        class="flex justify-between items-center px-4 py-3 border border-border rounded-sm bg-surface hover:border-primary hover:no-underline mb-2 block"
+        href={`${base}forms/validation`}
+      >
+        <strong>Input Validation</strong>
+        <span class="text-xs text-muted text-right">Layer 1 / 0 KB JS</span>
+      </a>
+      <a
+        class="flex justify-between items-center px-4 py-3 border border-border rounded-sm bg-surface hover:border-primary hover:no-underline mb-2 block"
+        href={`${base}forms/multi-step/step1`}
+      >
+        <strong>Multi-step Form</strong>
+        <span class="text-xs text-muted text-right"
+          >Layer 1 / inline &lt;script&gt; only</span
+        >
+      </a>
+    </section>
+
+    <section>
+      <h2
+        class="mt-8 mb-3 text-sm text-muted uppercase tracking-wide font-bold"
+      >
+        Navigation & Views
+      </h2>
+      <a
+        class="flex justify-between items-center px-4 py-3 border border-border rounded-sm bg-surface hover:border-primary hover:no-underline mb-2 block"
+        href={`${base}navigation/tabs/a`}
+      >
+        <strong>Tabs</strong>
+        <span class="text-xs text-muted text-right">Layer 1 / 0 KB JS</span>
+      </a>
+      <a
+        class="flex justify-between items-center px-4 py-3 border border-border rounded-sm bg-surface hover:border-primary hover:no-underline mb-2 block"
+        href={`${base}navigation/accordion`}
+      >
+        <strong>Accordion</strong>
+        <span class="text-xs text-muted text-right">Layer 1 / 0 KB JS</span>
+      </a>
+    </section>
+
+    <section>
+      <h2
+        class="mt-8 mb-3 text-sm text-muted uppercase tracking-wide font-bold"
+      >
+        UI Components
+      </h2>
+      <a
+        class="flex justify-between items-center px-4 py-3 border border-border rounded-sm bg-surface hover:border-primary hover:no-underline mb-2 block"
+        href={`${base}components/dialog`}
+      >
+        <strong>Dialog</strong>
+        <span class="text-xs text-muted text-right">Layer 1 / 0 KB JS</span>
+      </a>
+      <a
+        class="flex justify-between items-center px-4 py-3 border border-border rounded-sm bg-surface hover:border-primary hover:no-underline mb-2 block"
+        href={`${base}components/tooltip`}
+      >
+        <strong>Tooltip</strong>
+        <span class="text-xs text-muted text-right">Layer 1 / 0 KB JS</span>
+      </a>
+      <a
+        class="flex justify-between items-center px-4 py-3 border border-border rounded-sm bg-surface hover:border-primary hover:no-underline mb-2 block"
+        href={`${base}components/toast`}
+      >
+        <strong>Toast Notification</strong>
+        <span class="text-xs text-muted text-right"
+          >Layer 1 / inline &lt;script&gt; only</span
+        >
+      </a>
+      <a
+        class="flex justify-between items-center px-4 py-3 border border-border rounded-sm bg-surface hover:border-primary hover:no-underline mb-2 block"
+        href={`${base}components/carousel`}
+      >
+        <strong>Carousel</strong>
+        <span class="text-xs text-muted text-right">Layer 1 / 0 KB JS</span>
+      </a>
+      <a
+        class="flex justify-between items-center px-4 py-3 border border-border rounded-sm bg-surface hover:border-primary hover:no-underline mb-2 block"
+        href={`${base}components/lightbox`}
+      >
+        <strong>Lightbox</strong>
+        <span class="text-xs text-muted text-right">Layer 1 / 0 KB JS</span>
+      </a>
+      <a
+        class="flex justify-between items-center px-4 py-3 border border-border rounded-sm bg-surface hover:border-primary hover:no-underline mb-2 block"
+        href={`${base}components/hamburger`}
+      >
+        <strong>Hamburger Menu</strong>
+        <span class="text-xs text-muted text-right">Layer 1 / 0 KB JS</span>
+      </a>
+      <a
+        class="flex justify-between items-center px-4 py-3 border border-border rounded-sm bg-surface hover:border-primary hover:no-underline mb-2 block"
+        href={`${base}components/dark-mode`}
+      >
+        <strong>Dark Mode Toggle</strong>
+        <span class="text-xs text-muted text-right"
+          >Layer 1 / inline &lt;script&gt; only</span
+        >
+      </a>
+      <a
+        class="flex justify-between items-center px-4 py-3 border border-border rounded-sm bg-surface hover:border-primary hover:no-underline mb-2 block"
+        href={`${base}components/loading-overlay`}
+      >
+        <strong>Loading Overlay</strong>
+        <span class="text-xs text-muted text-right"
+          >Layer 1-2 / inline &lt;script&gt; only</span
+        >
+      </a>
+    </section>
+
+    <section>
+      <h2
+        class="mt-8 mb-3 text-sm text-muted uppercase tracking-wide font-bold"
+      >
+        Interaction
+      </h2>
+      <a
+        class="flex justify-between items-center px-4 py-3 border border-border rounded-sm bg-surface hover:border-primary hover:no-underline mb-2 block"
+        href={`${base}interaction/drag-drop`}
+      >
+        <strong>Drag & Drop</strong>
+        <span class="text-xs text-muted text-right"
+          >Layer 2 / inline &lt;script&gt; only</span
+        >
+      </a>
+      <a
+        class="flex justify-between items-center px-4 py-3 border border-border rounded-sm bg-surface hover:border-primary hover:no-underline mb-2 block"
+        href={`${base}interaction/clipboard`}
+      >
+        <strong>Clipboard</strong>
+        <span class="text-xs text-muted text-right"
+          >Layer 2 / inline &lt;script&gt; only</span
+        >
+      </a>
+      <a
+        class="flex justify-between items-center px-4 py-3 border border-border rounded-sm bg-surface hover:border-primary hover:no-underline mb-2 block"
+        href={`${base}interaction/autocomplete`}
+      >
+        <strong>Autocomplete</strong>
+        <span class="text-xs text-muted text-right"
+          >Layer 1-2 / inline &lt;script&gt; only</span
+        >
+      </a>
+    </section>
+  </main>
+</Layout>

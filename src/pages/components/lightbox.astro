@@ -1,0 +1,90 @@
+---
+import PatternLayout from "../../layouts/PatternLayout.astro";
+const images = Array.from({ length: 6 }, (_, i) => i + 1);
+---
+
+<PatternLayout
+  title="Image Lightbox"
+  assumption="react-lightbox / state + portal + keyboard handling"
+  technique="<dialog> + CSS object-fit: contain"
+  layer="1-2"
+  jsShipped="inline <script> only"
+>
+  <div class="grid grid-cols-3 gap-2 max-w-[500px]">
+    {
+      images.map((id) => (
+        <button class="thumb" data-id={id} aria-label={`Open image ${id}`}>
+          <img
+            src={`https://picsum.photos/seed/${id}/200/200`}
+            alt={`Thumbnail ${id}`}
+            width="200"
+            height="200"
+            loading="lazy"
+            class="w-full h-auto rounded-sm"
+          />
+        </button>
+      ))
+    }
+  </div>
+
+  <dialog
+    id="lightbox"
+    class="border-none bg-transparent p-0 max-w-[90vw] max-h-[90vh]"
+  >
+    <img
+      id="lightbox-img"
+      src=""
+      alt=""
+      class="rounded-md max-w-[80vw] max-h-[80vh] object-contain"
+    />
+  </dialog>
+
+  <style>
+    dialog::backdrop {
+      background: rgba(0, 0, 0, 0.85);
+    }
+    dialog[open] {
+      margin: auto;
+    }
+    .thumb {
+      padding: 0;
+      border: none;
+      cursor: pointer;
+      background: none;
+    }
+    #lightbox-img {
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+    #lightbox-img.loaded {
+      opacity: 1;
+    }
+  </style>
+
+  <script>
+    document.addEventListener("astro:page-load", () => {
+      const dialog = document.getElementById(
+        "lightbox",
+      ) as HTMLDialogElement | null;
+      const img = document.getElementById(
+        "lightbox-img",
+      ) as HTMLImageElement | null;
+      if (!dialog || !img) return;
+      document.querySelectorAll(".thumb").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          const id = (btn as HTMLElement).dataset.id;
+          img.classList.remove("loaded");
+          img.src = `https://picsum.photos/seed/${id}/800/600`;
+          img.alt = `Image ${id}`;
+          dialog.showModal();
+        });
+      });
+      img.addEventListener("load", () => {
+        img.classList.add("loaded");
+      });
+      dialog.addEventListener("click", (e) => {
+        if (e.target === dialog) dialog.close();
+      });
+    });
+  </script>
+</PatternLayout>

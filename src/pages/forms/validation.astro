@@ -1,0 +1,116 @@
+---
+import PatternLayout from "../../layouts/PatternLayout.astro";
+---
+
+<PatternLayout
+  title="Input Validation"
+  assumption="Formik / react-hook-form required"
+  technique="HTML5 validation attributes"
+  layer="1"
+  jsShipped="inline <script> only"
+>
+  <form id="validation-form" class="grid gap-4 max-w-[400px]">
+    <label>
+      Name (required)
+      <input
+        type="text"
+        name="name"
+        required
+        class="border border-border rounded-sm p-2 bg-surface w-full mt-1"
+      />
+      <span class="text-xs text-muted mt-0.5 block"
+        >Any text, cannot be empty</span
+      >
+    </label>
+    <label>
+      Postal Code (###-####)
+      <input
+        type="text"
+        name="postal"
+        required
+        pattern="[0-9]{3}-[0-9]{4}"
+        placeholder="123-4567"
+        class="border border-border rounded-sm p-2 bg-surface w-full mt-1"
+      />
+      <span class="text-xs text-muted mt-0.5 block">Format: 123-4567</span>
+    </label>
+    <label>
+      Quantity (1-100)
+      <input
+        type="number"
+        name="qty"
+        required
+        min="1"
+        max="100"
+        class="border border-border rounded-sm p-2 bg-surface w-full mt-1"
+      />
+      <span class="text-xs text-muted mt-0.5 block"
+        >Integer between 1 and 100</span
+      >
+    </label>
+    <label>
+      Email
+      <input
+        type="email"
+        name="email"
+        required
+        class="border border-border rounded-sm p-2 bg-surface w-full mt-1"
+      />
+      <span class="text-xs text-muted mt-0.5 block">e.g. user@example.com</span>
+    </label>
+    <button
+      type="submit"
+      class="bg-primary text-white border border-primary rounded-sm px-4 py-2 cursor-pointer hover:bg-primary-hover"
+      >Submit</button
+    >
+  </form>
+  <div
+    id="validation-success"
+    class="mt-4 p-3 bg-success/10 border border-success rounded-sm text-success max-w-[400px]"
+    style="display:none;"
+  >
+    All fields valid! In production, this form would submit to the server.
+  </div>
+
+  <style>
+    #validation-success {
+      animation: fade-in-out 3s ease forwards;
+    }
+    @keyframes fade-in-out {
+      0% {
+        opacity: 0;
+      }
+      10% {
+        opacity: 1;
+      }
+      80% {
+        opacity: 1;
+      }
+      100% {
+        opacity: 0;
+      }
+    }
+  </style>
+
+  <script>
+    document.addEventListener("astro:page-load", () => {
+      const form = document.getElementById(
+        "validation-form",
+      ) as HTMLFormElement | null;
+      const success = document.getElementById(
+        "validation-success",
+      ) as HTMLElement | null;
+      if (!form || !success) return;
+      form.addEventListener("submit", (e) => {
+        e.preventDefault();
+        success.style.display = "block";
+        success.style.animation = "none";
+        void success.offsetWidth;
+        success.style.animation = "";
+        setTimeout(() => {
+          success.style.display = "none";
+        }, 3000);
+      });
+    });
+  </script>
+</PatternLayout>

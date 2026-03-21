@@ -1,0 +1,43 @@
+---
+import PatternLayout from "../../layouts/PatternLayout.astro";
+const suggestions = [
+  "Alpha",
+  "Bravo",
+  "Charlie",
+  "Delta",
+  "Echo",
+  "Foxtrot",
+  "Golf",
+  "Hotel",
+  "India",
+  "Juliet",
+  "Kilo",
+  "Lima",
+];
+---
+
+<PatternLayout
+  title="Autocomplete"
+  assumption="react-select / Downshift / Combobox library"
+  technique="<datalist> element"
+  layer="1"
+  jsShipped="0 KB"
+>
+  <div class="max-w-[400px]">
+    <label>
+      Search items
+      <input
+        type="text"
+        list="suggestions"
+        placeholder="Type to filter..."
+        class="border border-border rounded-sm p-2 bg-surface w-full mt-1"
+      />
+    </label>
+    <datalist id="suggestions">
+      {suggestions.map((s) => <option value={s} />)}
+    </datalist>
+    <p class="text-muted text-sm mt-2">
+      Browser-native UI. Works with keyboard. Type to filter suggestions.
+    </p>
+  </div>
+</PatternLayout>
