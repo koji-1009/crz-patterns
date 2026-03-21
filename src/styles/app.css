@@ -55,3 +55,11 @@ a {
 a:hover {
   text-decoration: underline;
 }
+
+/* Skip view transition animation on back/forward navigation.
+   Safari's back gesture shows its own slide preview — running
+   a view transition on top of that causes a visible double-animation. */
+html[data-astro-transition="back"]::view-transition-old(root),
+html[data-astro-transition="back"]::view-transition-new(root) {
+  animation-duration: 0s !important;
+}
