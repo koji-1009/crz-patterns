@@ -10,9 +10,9 @@ Built on [Crumple Zone Architecture](https://github.com/koji-1009/crumple-zone-a
 
 ## What This Proves
 
-Every pattern in this catalog has a stated "AI's default choice" — the library or framework feature that SPA-trained AI tends to reach for. Each demo shows the same result achieved with browser-native APIs, HTML, and CSS.
+Every pattern in this catalog has a stated "SPA assumption" — the library or framework feature developers tend to reach for. Each demo shows the same result achieved with browser-native APIs, HTML, and CSS.
 
-| Pattern           | AI's Default Choice                  | Web Platform Technique               |
+| Pattern           | SPA Assumption                       | Web Platform Technique               |
 | ----------------- | ------------------------------------ | ------------------------------------ |
 | Draft Persistence | useState + Context                   | sessionStorage                       |
 | Input Validation  | Formik / react-hook-form             | HTML5 validation attributes          |
@@ -29,7 +29,6 @@ Every pattern in this catalog has a stated "AI's default choice" — the library
 | Loading Overlay   | isLoading useState + Suspense        | `<dialog>` + URL state               |
 | Drag & Drop       | dnd-kit / react-beautiful-dnd        | HTML5 Drag and Drop API              |
 | Clipboard         | useState + useRef                    | `navigator.clipboard`                |
-| Autocomplete      | react-select / Downshift             | `<datalist>`                         |
 
 ## Architecture
 
@@ -39,7 +38,7 @@ Every pattern in this catalog has a stated "AI's default choice" — the library
 * **localStorage for preferences** — Dark mode only
 * **Popover API / `<dialog>`** — Top layer for overlays, no `z-index` hacks
 * **CSS animations at Layer 2** — `@starting-style`, `interpolate-size`, `::details-content`
-* **ClientRouter with zero config** — One line in Layout, no `transition:animate` directives
+* **ClientRouter** — ViewTransition API for page transitions, `astro:before-swap` for dark mode persistence
 
 ## Tech Stack
 
