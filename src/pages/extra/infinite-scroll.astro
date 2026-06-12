@@ -14,27 +14,32 @@ const base = import.meta.env.BASE_URL;
   layer="1-3"
   jsShipped="inline <script> only"
 >
-  <ul id="feed" class="border border-border rounded-md bg-surface">
-    {firstChunk.map((item) => <FeedItem item={item} />)}
-  </ul>
+  <div
+    id="feed-box"
+    class="h-[28rem] overflow-y-auto border border-border rounded-md bg-surface"
+  >
+    <ul id="feed">
+      {firstChunk.map((item) => <FeedItem item={item} />)}
+    </ul>
+    <div
+      id="sentinel"
+      class="h-14 flex items-center justify-center text-sm text-muted"
+      data-endpoint={`${base}extra/infinite-scroll/feed/`}
+      data-next-page="2"
+      data-total-pages={TOTAL_PAGES}
+    >
+    </div>
+  </div>
   <template id="item-template">
     <FeedItem />
   </template>
-  <div
-    id="sentinel"
-    class="min-h-12 py-4 text-center text-sm text-muted"
-    data-endpoint={`${base}extra/infinite-scroll/feed/`}
-    data-next-page="2"
-    data-total-pages={TOTAL_PAGES}
-  >
-  </div>
   <noscript>
     <p class="py-4 text-center text-sm text-muted">
       JavaScript is disabled — only the first {PAGE_SIZE} items are available.
     </p>
   </noscript>
   <p class="text-muted text-sm mt-2">
-    Scroll to the bottom. The next chunk is fetched as build-time JSON and
+    Scroll the list. The next chunk is fetched as build-time JSON and
     rendered through the inline <code>&lt;template&gt;</code>. The URL never
     changes: reload starts over, and without JavaScript nothing past the first
     chunk is reachable. That is the feed pattern's inherent trade-off, not an
@@ -53,12 +58,13 @@ const base = import.meta.env.BASE_URL;
 
   document.addEventListener("astro:page-load", () => {
     observer?.disconnect();
+    const box = document.getElementById("feed-box");
     const feed = document.getElementById("feed");
     const sentinel = document.getElementById("sentinel");
     const template = document.getElementById(
       "item-template",
     ) as HTMLTemplateElement | null;
-    if (!feed || !sentinel || !template) return;
+    if (!box || !feed || !sentinel || !template) return;
 
     let nextPage = Number(sentinel.dataset.nextPage);
     const totalPages = Number(sentinel.dataset.totalPages);
@@ -118,7 +124,7 @@ const base = import.meta.env.BASE_URL;
       (entries) => {
         if (entries.some((e) => e.isIntersecting)) loadNext();
       },
-      { rootMargin: "200px" },
+      { root: box, rootMargin: "200px" },
     );
     observer.observe(sentinel);
   });
