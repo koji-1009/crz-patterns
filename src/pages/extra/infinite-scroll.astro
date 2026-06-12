@@ -27,6 +27,7 @@ const base = import.meta.env.BASE_URL;
       data-endpoint={`${base}extra/infinite-scroll/feed/`}
       data-next-page="2"
       data-total-pages={TOTAL_PAGES}
+      data-page-size={PAGE_SIZE}
     >
     </div>
   </div>
@@ -39,12 +40,14 @@ const base = import.meta.env.BASE_URL;
     </p>
   </noscript>
   <p class="text-muted text-sm mt-2">
-    Scroll the list. The next chunk is fetched as build-time JSON and
-    rendered through the inline <code>&lt;template&gt;</code>. The URL never
-    changes: reload starts over, and without JavaScript nothing past the first
-    chunk is reachable. That is the feed pattern's inherent trade-off, not an
-    implementation shortcut. Each row uses <code>content-visibility: auto</code
-    >, so off-screen rows skip layout and paint.
+    Scroll the list. Upcoming rows are reserved as placeholder skeletons (cf.
+    Android Paging's <code>enablePlaceholders</code>), so chunks fetched as
+    build-time JSON fade into already-reserved space instead of shifting
+    layout. The URL never changes: reload starts over, and without JavaScript
+    nothing past the first chunk is reachable. That is the feed pattern's
+    inherent trade-off, not an implementation shortcut. Each row uses
+    <code>content-visibility: auto</code>, so off-screen rows skip layout and
+    paint.
   </p>
   <p class="mt-4">
     <a href={`${base}extra/seamless-paging/1`}
@@ -58,50 +61,100 @@ const base = import.meta.env.BASE_URL;
 
   document.addEventListener("astro:page-load", () => {
     observer?.disconnect();
-    const box = document.getElementById("feed-box");
-    const feed = document.getElementById("feed");
-    const sentinel = document.getElementById("sentinel");
-    const template = document.getElementById(
+    const boxEl = document.getElementById("feed-box");
+    const feedEl = document.getElementById("feed");
+    const sentinelEl = document.getElementById("sentinel");
+    const templateEl = document.getElementById(
       "item-template",
     ) as HTMLTemplateElement | null;
-    if (!box || !feed || !sentinel || !template) return;
+    if (!boxEl || !feedEl || !sentinelEl || !templateEl) return;
+    // Narrowed bindings: hoisted inner functions don't inherit the guard above
+    const box = boxEl;
+    const feed = feedEl;
+    const sentinel = sentinelEl;
+    const template = templateEl;
 
     let nextPage = Number(sentinel.dataset.nextPage);
     const totalPages = Number(sentinel.dataset.totalPages);
+    const pageSize = Number(sentinel.dataset.pageSize);
     const endpoint = sentinel.dataset.endpoint ?? "";
+    let skeletons: HTMLLIElement[] = [];
     let loading = false;
 
+    function makeSkeleton(): HTMLLIElement | null {
+      const node = template.content.cloneNode(true) as DocumentFragment;
+      return node.querySelector("li");
+    }
+
+    // Placeholder rows are a Layer 3 affordance, so they are inserted here
+    // rather than in the build-time HTML — the no-JS page stays clean.
+    function appendSkeletons() {
+      skeletons = [];
+      for (let i = 0; i < pageSize; i++) {
+        const li = makeSkeleton();
+        if (!li) continue;
+        feed.appendChild(li);
+        skeletons.push(li);
+      }
+      // Observing the first placeholder starts the fetch just as the
+      // reserved space approaches, so skeletons are visible only briefly
+      const first = skeletons[0];
+      if (first) observer?.observe(first);
+    }
+
+    function fill(
+      li: HTMLLIElement,
+      item: { title: string; body: string; seed: string },
+    ) {
+      const img = li.querySelector("img");
+      if (img) {
+        img.src = `https://picsum.photos/seed/${item.seed}/128/128`;
+        img.alt = item.title;
+      }
+      const text = li.querySelector("div");
+      if (text) {
+        // Snap to transparent without transitioning, then fade the content in
+        text.style.transition = "none";
+        text.style.opacity = "0";
+      }
+      const title = li.querySelector("[data-title]");
+      if (title) title.textContent = item.title;
+      const body = li.querySelector("[data-body]");
+      if (body) body.textContent = item.body;
+      li.dataset.state = "filled";
+      if (text) {
+        void text.offsetWidth;
+        text.style.transition = "";
+        text.style.opacity = "";
+      }
+    }
+
     async function loadNext() {
-      if (loading || !feed || !sentinel || !template) return;
+      if (loading) return;
       loading = true;
-      sentinel.textContent = "Loading…";
       try {
         const res = await fetch(`${endpoint}${nextPage}.json`);
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const items: { title: string; body: string; seed: string }[] =
           await res.json();
-        for (const item of items) {
-          const node = template.content.cloneNode(true) as DocumentFragment;
-          const img = node.querySelector("img");
-          if (img) {
-            img.src = `https://picsum.photos/seed/${item.seed}/128/128`;
-            img.alt = item.title;
+        observer?.disconnect();
+        items.forEach((item, i) => {
+          let li = skeletons[i];
+          if (!li) {
+            const extra = makeSkeleton();
+            if (!extra) return;
+            feed.appendChild(extra);
+            li = extra;
           }
-          const title = node.querySelector("[data-title]");
-          if (title) title.textContent = item.title;
-          const body = node.querySelector("[data-body]");
-          if (body) body.textContent = item.body;
-          feed.appendChild(node);
-        }
+          fill(li, item);
+        });
+        for (const leftover of skeletons.slice(items.length)) leftover.remove();
         nextPage++;
         if (nextPage > totalPages) {
-          observer?.disconnect();
+          skeletons = [];
           sentinel.textContent = "— End of feed —";
         } else {
-          sentinel.textContent = "";
-          // Re-observe so the callback fires again if the sentinel is still in view
-          observer?.unobserve(sentinel);
-          observer?.observe(sentinel);
+          appendSkeletons();
         }
       } catch {
         observer?.disconnect();
@@ -111,7 +164,6 @@ const base = import.meta.env.BASE_URL;
           "bg-primary text-white border border-primary rounded-sm px-4 py-2 cursor-pointer hover:bg-primary-hover";
         btn.onclick = () => {
           sentinel.replaceChildren();
-          observer?.observe(sentinel);
           loadNext();
         };
         sentinel.replaceChildren(btn);
@@ -126,6 +178,8 @@ const base = import.meta.env.BASE_URL;
       },
       { root: box, rootMargin: "200px" },
     );
-    observer.observe(sentinel);
+
+    if (nextPage <= totalPages) appendSkeletons();
+    else sentinel.textContent = "— End of feed —";
   });
 </script>

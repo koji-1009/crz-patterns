@@ -8,7 +8,8 @@ const { item } = Astro.props;
 ---
 
 <li
-  class="flex gap-3 items-center p-3 border-b border-border last:border-b-0 [content-visibility:auto] [contain-intrinsic-size:auto_88px]"
+  data-state={item ? "filled" : "skeleton"}
+  class="group flex gap-3 items-center p-3 border-b border-border last:border-b-0 [content-visibility:auto] [contain-intrinsic-size:auto_88px] data-[state=skeleton]:animate-pulse"
 >
   <img
     src={item ? `https://picsum.photos/seed/${item.seed}/128/128` : ""}
@@ -18,8 +19,18 @@ const { item } = Astro.props;
     loading="lazy"
     class="w-16 h-16 rounded-md object-cover bg-surface-alt flex-none"
   />
-  <div class="min-w-0">
-    <h3 class="font-semibold truncate" data-title>{item?.title}</h3>
-    <p class="text-sm text-muted" data-body>{item?.body}</p>
+  <div class="min-w-0 transition-opacity duration-300">
+    <h3
+      class="font-semibold truncate group-data-[state=skeleton]:h-4 group-data-[state=skeleton]:w-32 group-data-[state=skeleton]:rounded group-data-[state=skeleton]:bg-surface-alt"
+      data-title
+    >
+      {item?.title}
+    </h3>
+    <p
+      class="text-sm text-muted group-data-[state=skeleton]:mt-1 group-data-[state=skeleton]:h-3 group-data-[state=skeleton]:w-48 group-data-[state=skeleton]:rounded group-data-[state=skeleton]:bg-surface-alt"
+      data-body
+    >
+      {item?.body}
+    </p>
   </div>
 </li>
