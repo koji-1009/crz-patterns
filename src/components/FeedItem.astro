@@ -1,0 +1,25 @@
+---
+import type { FeedItem } from "../data/feed";
+
+interface Props {
+  item?: FeedItem;
+}
+const { item } = Astro.props;
+---
+
+<li
+  class="flex gap-3 items-center p-3 border-b border-border last:border-b-0 [content-visibility:auto] [contain-intrinsic-size:auto_88px]"
+>
+  <img
+    src={item ? `https://picsum.photos/seed/${item.seed}/128/128` : ""}
+    alt={item?.title ?? ""}
+    width="64"
+    height="64"
+    loading="lazy"
+    class="w-16 h-16 rounded-md object-cover bg-surface-alt flex-none"
+  />
+  <div class="min-w-0">
+    <h3 class="font-semibold truncate" data-title>{item?.title}</h3>
+    <p class="text-sm text-muted" data-body>{item?.body}</p>
+  </div>
+</li>

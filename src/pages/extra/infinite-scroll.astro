@@ -1,0 +1,125 @@
+---
+import FeedItem from "../../components/FeedItem.astro";
+import PatternLayout from "../../layouts/PatternLayout.astro";
+import { feedPage, PAGE_SIZE, TOTAL_PAGES } from "../../data/feed";
+
+const firstChunk = feedPage(1);
+const base = import.meta.env.BASE_URL;
+---
+
+<PatternLayout
+  title="Infinite Scroll (Feed)"
+  assumption="useInfiniteQuery + react-infinite-scroll-component"
+  technique="IntersectionObserver + fetch + <template> + content-visibility"
+  layer="1-3"
+  jsShipped="inline <script> only"
+>
+  <ul id="feed" class="border border-border rounded-md bg-surface">
+    {firstChunk.map((item) => <FeedItem item={item} />)}
+  </ul>
+  <template id="item-template">
+    <FeedItem />
+  </template>
+  <div
+    id="sentinel"
+    class="min-h-12 py-4 text-center text-sm text-muted"
+    data-endpoint={`${base}extra/infinite-scroll/feed/`}
+    data-next-page="2"
+    data-total-pages={TOTAL_PAGES}
+  >
+  </div>
+  <noscript>
+    <p class="py-4 text-center text-sm text-muted">
+      JavaScript is disabled — only the first {PAGE_SIZE} items are available.
+    </p>
+  </noscript>
+  <p class="text-muted text-sm mt-2">
+    Scroll to the bottom. The next chunk is fetched as build-time JSON and
+    rendered through the inline <code>&lt;template&gt;</code>. The URL never
+    changes: reload starts over, and without JavaScript nothing past the first
+    chunk is reachable. That is the feed pattern's inherent trade-off, not an
+    implementation shortcut. Each row uses <code>content-visibility: auto</code
+    >, so off-screen rows skip layout and paint.
+  </p>
+  <p class="mt-4">
+    <a href={`${base}extra/seamless-paging/1`}
+      >Compare: Seamless Pagination →</a
+    >
+  </p>
+</PatternLayout>
+
+<script>
+  let observer: IntersectionObserver | null = null;
+
+  document.addEventListener("astro:page-load", () => {
+    observer?.disconnect();
+    const feed = document.getElementById("feed");
+    const sentinel = document.getElementById("sentinel");
+    const template = document.getElementById(
+      "item-template",
+    ) as HTMLTemplateElement | null;
+    if (!feed || !sentinel || !template) return;
+
+    let nextPage = Number(sentinel.dataset.nextPage);
+    const totalPages = Number(sentinel.dataset.totalPages);
+    const endpoint = sentinel.dataset.endpoint ?? "";
+    let loading = false;
+
+    async function loadNext() {
+      if (loading || !feed || !sentinel || !template) return;
+      loading = true;
+      sentinel.textContent = "Loading…";
+      try {
+        const res = await fetch(`${endpoint}${nextPage}.json`);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const items: { title: string; body: string; seed: string }[] =
+          await res.json();
+        for (const item of items) {
+          const node = template.content.cloneNode(true) as DocumentFragment;
+          const img = node.querySelector("img");
+          if (img) {
+            img.src = `https://picsum.photos/seed/${item.seed}/128/128`;
+            img.alt = item.title;
+          }
+          const title = node.querySelector("[data-title]");
+          if (title) title.textContent = item.title;
+          const body = node.querySelector("[data-body]");
+          if (body) body.textContent = item.body;
+          feed.appendChild(node);
+        }
+        nextPage++;
+        if (nextPage > totalPages) {
+          observer?.disconnect();
+          sentinel.textContent = "— End of feed —";
+        } else {
+          sentinel.textContent = "";
+          // Re-observe so the callback fires again if the sentinel is still in view
+          observer?.unobserve(sentinel);
+          observer?.observe(sentinel);
+        }
+      } catch {
+        observer?.disconnect();
+        const btn = document.createElement("button");
+        btn.textContent = "Load failed — Retry";
+        btn.className =
+          "bg-primary text-white border border-primary rounded-sm px-4 py-2 cursor-pointer hover:bg-primary-hover";
+        btn.onclick = () => {
+          sentinel.replaceChildren();
+          observer?.observe(sentinel);
+          loadNext();
+        };
+        sentinel.replaceChildren(btn);
+      } finally {
+        loading = false;
+      }
+    }
+
+    observer = new IntersectionObserver(
+      (entries) => {
+        if (entries.some((e) => e.isIntersecting)) loadNext();
+      },
+      { rootMargin: "200px" },
+    );
+    observer.observe(sentinel);
+  });
+</script>

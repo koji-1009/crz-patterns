@@ -29,6 +29,8 @@ Every pattern in this catalog has a stated "SPA assumption" — the library or f
 | Loading Overlay   | isLoading useState + Suspense        | `<dialog>` + URL state               |
 | Drag & Drop       | dnd-kit / react-beautiful-dnd        | HTML5 Drag and Drop API              |
 | Clipboard         | useState + useRef                    | `navigator.clipboard`                |
+| Infinite Scroll (Feed) | useInfiniteQuery + react-infinite-scroll-component | IntersectionObserver + fetch + `<template>` |
+| Seamless Pagination | SPA router + client-side query cache | Static pages + IntersectionObserver + `DOMParser` + `replaceState` |
 
 ## Architecture
 
