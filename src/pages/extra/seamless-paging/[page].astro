@@ -35,12 +35,15 @@ const nextHref =
       <a
         id="load-more"
         href={nextHref}
-        class="block py-4 text-center text-primary"
+        class="flex h-14 items-center justify-center text-primary"
       >
         Load more
       </a>
     ) : (
-      <p id="list-end" class="py-4 text-center text-sm text-muted">
+      <p
+        id="list-end"
+        class="flex h-14 items-center justify-center text-sm text-muted"
+      >
         — End of list —
       </p>
     )
@@ -118,7 +121,8 @@ const nextHref =
       (entries) => {
         if (entries.some((e) => e.isIntersecting)) loadNext();
       },
-      { rootMargin: "200px" },
+      // Wide margin: splice in the next page well before the list bottom is visible
+      { rootMargin: "600px" },
     );
     observer.observe(link);
   });
