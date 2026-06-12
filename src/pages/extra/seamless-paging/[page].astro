@@ -28,6 +28,15 @@ const nextHref =
     URL advance as you scroll.
   </p>
   <ul id="list" class="border border-border rounded-md bg-surface">
+    {
+      page > 1 && (
+        <li class="flex items-center gap-3 px-3 py-3 text-xs text-muted">
+          <span class="flex-1 border-t border-border" />
+          Page {page}
+          <span class="flex-1 border-t border-border" />
+        </li>
+      )
+    }
     {items.map((item) => <FeedItem item={item} />)}
   </ul>
   {
@@ -50,8 +59,9 @@ const nextHref =
   }
   <p class="text-muted text-sm mt-2">
     Scroll to the bottom. The next statically generated page is fetched and its
-    list items are spliced in, while <code>replaceState</code> advances the
-    URL — reload or share and you land on a real page. Without JavaScript,
+    list items are spliced in, each page keeping its boundary divider so the
+    seam is visible by design. <code>replaceState</code> advances the URL —
+    reload or share and you land on a real page. Without JavaScript,
     "Load more" is a plain link and the demo degrades to ordinary pagination:
     the full crumple zone.
   </p>
