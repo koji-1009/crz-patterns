@@ -27,18 +27,18 @@ const nextHref =
     Page <span id="page-indicator">{page}</span> of {TOTAL_PAGES} — watch the
     URL advance as you scroll.
   </p>
-  <ul id="list" class="border border-border rounded-md bg-surface">
+  <div id="pages">
     {
       page > 1 && (
-        <li class="flex items-center gap-3 px-3 py-3 text-xs text-muted">
-          <span class="flex-1 border-t border-border" />
+        <p class="-mx-4 my-4 py-2 bg-surface-alt border-y border-border text-center text-sm text-muted uppercase tracking-wide font-bold">
           Page {page}
-          <span class="flex-1 border-t border-border" />
-        </li>
+        </p>
       )
     }
-    {items.map((item) => <FeedItem item={item} />)}
-  </ul>
+    <ul class="border border-border rounded-md bg-surface">
+      {items.map((item) => <FeedItem item={item} />)}
+    </ul>
+  </div>
   {
     nextHref ? (
       <a
@@ -58,9 +58,9 @@ const nextHref =
     )
   }
   <p class="text-muted text-sm mt-2">
-    Scroll to the bottom. The next statically generated page is fetched and its
-    list items are spliced in, each page keeping its boundary divider so the
-    seam is visible by design. <code>replaceState</code> advances the URL —
+    Scroll to the bottom. The next statically generated page is appended as its
+    own card, opening with a full-width divider band so where each page begins
+    is explicit. <code>replaceState</code> advances the URL —
     reload or share and you land on a real page. Without JavaScript,
     "Load more" is a plain link and the demo degrades to ordinary pagination:
     the full crumple zone.
@@ -77,17 +77,17 @@ const nextHref =
 
   document.addEventListener("astro:page-load", () => {
     observer?.disconnect();
-    const list = document.getElementById("list");
+    const pages = document.getElementById("pages");
     const link = document.getElementById(
       "load-more",
     ) as HTMLAnchorElement | null;
     const indicator = document.getElementById("page-indicator");
-    if (!list || !link) return;
+    if (!pages || !link) return;
 
     let loading = false;
 
     async function loadNext() {
-      if (loading || !list || !link) return;
+      if (loading || !pages || !link) return;
       loading = true;
       const pageHref = link.href;
       try {
@@ -97,9 +97,10 @@ const nextHref =
           await res.text(),
           "text/html",
         );
-        const items = doc.querySelectorAll("#list > li");
-        if (items.length === 0) throw new Error("unexpected response");
-        for (const li of items) list.appendChild(li);
+        // Each fetched page contributes its divider band and its own card
+        const chunks = doc.querySelectorAll("#pages > *");
+        if (chunks.length === 0) throw new Error("unexpected response");
+        for (const el of chunks) pages.appendChild(el);
         history.replaceState(null, "", pageHref);
         if (indicator) {
           const page = new URL(pageHref).pathname.split("/").filter(Boolean).pop();
