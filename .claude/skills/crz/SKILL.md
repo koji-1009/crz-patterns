@@ -1,8 +1,13 @@
+---
+name: crz
+description: Implement Astro applications with Crumple Zone Architecture — trust the browser, design for failure modes, minimize client state. Use when writing or modifying Astro code (pages, components, islands, Actions, middleware, state placement, project structure).
+---
+
 # Astro Crumple Zone Implementation
 
 Build healthy Astro applications with Crumple Zone Architecture. Trust the browser, design for failure modes, minimize framework dependency.
 
-Prerequisite: Astro 6+ with `output: 'server'`. This architecture requires server-side rendering for middleware, API routes, and data fetching in frontmatter.
+Prerequisite: Astro 7+ with `output: 'server'`. This architecture requires server-side rendering for middleware, API routes, and data fetching in frontmatter.
 
 ## Priorities
 
@@ -30,6 +35,8 @@ When concerns conflict, choose in this order:
 
 Rule: always ask "what happens if this breaks?" and implement in the lowest-numbered layer that accomplishes the task.
 
+HTML output notes (Astro 7): unclosed tags are build errors. Invalid nesting (e.g., `<div>` inside `<p>`) is passed through as-is — the browser's error recovery restructures the DOM, so the rendered DOM diverges from the source. Author structurally valid HTML; the compiler does not correct it. Whitespace follows JSX rules by default (`compressHTML: 'jsx'`): whitespace within a single line is preserved (a space between two inline elements on the same line survives), while whitespace and line breaks around elements are removed. The one trap: inline elements separated by a line break lose their spacing — keep spaced inline elements on the same line, or write the space explicitly.
+
 Islands in layers 3-4 should be wrapped in each framework's error boundary mechanism. If the island crashes, display a fallback UI instead of a blank space. This structurally enforces the isolation guarantee — the rest of the page remains intact.
 
 Server-side errors: provide `pages/500.astro` for unhandled exceptions. In `---` frontmatter, catch expected errors (DB failures, external API errors) and render an error state in HTML. Action handlers throw `ActionError` with appropriate codes — the calling island or form receives the error and displays feedback.
@@ -37,6 +44,40 @@ Server-side errors: provide `pages/500.astro` for unhandled exceptions. In `---`
 Partial failure: when frontmatter fetches from multiple sources, catch each independently. Display successful results and show a warning banner for failed sources. Do not fail the entire page because one source is unavailable — this applies "Recoverability > Continuity" at the data level.
 
 ## Component Decisions
+
+### Page Structure
+
+Pages combine semantic HTML for structure with components at concern boundaries:
+
+```astro
+<Layout>
+  <section>
+    <h1>{title}</h1>
+    <ItemFilter />
+    <ItemTable items={items} />
+  </section>
+  <aside>
+    <RecentActivity server:defer />
+  </aside>
+</Layout>
+```
+
+The page file holds frontmatter (data fetching, PRG handling), layout, the semantic HTML skeleton (landmarks, headings), and component composition — including conditional composition. Data display (lists, tables, cards, field groups) lives in extracted components. A page-level `<script>` is allowed only for behavior that spans multiple sections (see Script Behavior).
+
+Extraction is the default, not the exception. When building a page, actively look for splittable components — any section you can name is a component. Signals, strongest first:
+
+* It carries `<script>` behavior — repeated wiring is the strongest boundary marker (rule in Script Behavior)
+* It fetches its own data (enables partial failure pattern)
+* It has independent failure modes (limits blast radius)
+
+Within a single page, extraction needs no reuse justification — decomposing `.astro` is free at runtime (compiles to HTML; props and slots are the only interface). Reuse across 2+ pages is the design-component context: promote to `shared/components/` (project-wide) or the feature's `components/` (feature-wide). Extraction bounds what an edit can touch — not runtime errors: an uncaught frontmatter error in any component still fails the whole SSR render (runtime containment comes from the partial failure pattern).
+
+Inline HTML remains only for the skeleton and nameless structural glue (grid frames, dividers). Smell: an `.astro` file over ~100 lines — look for a boundary.
+
+Guards — split wide, not deep:
+
+* Compose one level per page (page → sections) by default. A deeper level needs its own nameable concern — never a pass-through component that only forwards props
+* Do not extract what you cannot name — a component without a nameable concern is fragmentation, not decomposition
 
 Use Astro (.astro) by default:
 
@@ -90,12 +131,25 @@ Island verification — before writing an island, confirm each hook is necessary
 * useState for scroll/carousel position → CSS `overflow-x: auto`. No island needed
 * useState for filter/sort selection → URL query params + server-side filtering. No island needed
 * useEffect fetching data → move to frontmatter. Never fetch in islands
-* useEffect syncing URL → URL is canonical. Use `<a>` or `navigate()`
+* useEffect syncing URL → URL is canonical. Use `<a>` or `window.location.assign()`
 * useEffect for DOM manipulation without state → use `<script>` tag
 
 If all state values are replaceable, the island is unnecessary — rewrite as `.astro` component or `<script>`.
 
 For the fuller decision model including navigation-first evaluation, see architecture.md section 5.1.
+
+### Script Behavior
+
+`<script>` handles layer-1 behavior: DOM operations without local state. Keep each script next to the markup it drives:
+
+* One component, one concern, one `<script>`. A page script wiring two unrelated widgets is the signal to split — extract each widget's markup together with its script into a dedicated component
+* Repeated script behavior is a component-boundary detector. The same wiring appearing twice — across sections or pages — marks a component to extract, owning both the markup and the script
+* Cross-cutting behavior that reads fields across sections is the parent's concern. Keep it at the parent — a page-level `<script>` is the legitimate home for section-spanning behavior. Pushing it into a child forces the child to query ancestor DOM
+* The goal is locality of source, not DOM sandboxing. Astro `<script>` is module-scoped, and document-wide `querySelector` is acceptable. Do not add wrapper elements or `data-scope` attributes just to narrow queries
+* A component's `<script>` runs once per page even when the component renders N times. Wire with `querySelectorAll` or `data-*` lookups and per-element listeners — never assume a single instance
+* The moment a behavior needs local state, it becomes an island (see decision test) — split the markup, not the script
+
+For the reasoning behind granularity and behavior locality, see architecture.md section 5.5.
 
 ## Pages and Data
 
@@ -148,7 +202,7 @@ Never use:
 
 Server handles correctness, client provides feedback as a crumple zone.
 
-Client-initiated mutations that accept user input requiring validation must use Astro Actions (`astro:actions`). Actions provide type-safe server functions with built-in Zod validation — the caller gets compile-time type errors if the contract is violated. Mutations without user input (logout, session clear) use `<form method="POST">` with PRG — no Action needed. Navigation without data change uses `<a>` or `navigate()` — not an Action.
+Client-initiated mutations that accept user input requiring validation must use Astro Actions (`astro:actions`). Actions provide type-safe server functions with built-in Zod validation — the caller gets compile-time type errors if the contract is violated. Mutations without user input (logout, session clear) use `<form method="POST">` with PRG — no Action needed. Navigation without data change uses `<a>` — not an Action.
 
 ```typescript
 // src/actions/index.ts
@@ -202,11 +256,18 @@ Client feedback (crumple zone):
 
 1. Submission starts → disable button, show progress
 2. Success → reconstruct from canonical sources:
-   * `navigate(url)` (ClientRouter) — soft reload with ViewTransition, preferred when ClientRouter is active
-   * `window.location.reload()` — hard reload, always works
+   * `window.location.reload()` — redisplay the same page
+   * `window.location.assign(url)` — move to another page
 3. Failure → re-enable button, show error
 
 If feedback breaks, the action still completes or fails correctly on the server.
+
+View/Wrapper separation — when an island calls Actions, separate View from integration:
+
+* View (`react/ItemFormView.tsx`): pure React component. Receives data and callbacks as props. No `astro:actions` import
+* Wrapper (`ItemForm.tsx`): imports `astro:actions`, manages state, passes props to View
+
+The wrapper is the crumple zone between UI and server actions. View changes and action logic changes stay independent. Split when the View has enough complexity that framework integration (astro:actions, state management) should not live alongside rendering logic. A single-action button does not need separation.
 
 `pages/api/` is only for external consumers (webhook receivers, SSE/streaming) — not for mutations initiated by the client. Client-initiated mutations — including file uploads — use Actions (`accept: "form"` handles FormData with files) with processing logic in `features/*/data/`. Mutations without user input (logout, session clear) use PRG.
 
@@ -255,32 +316,30 @@ export const onRequest = defineMiddleware(async (context, next) => {
 });
 ```
 
+Advanced routing (`src/fetch.ts`):
+
+* `src/fetch.ts` is a reserved filename. Creating it replaces Astro's default request pipeline entirely — the exported `fetch()` must call the `astro()` handler (or compose `astro/fetch` handlers), otherwise middleware, Actions, and page rendering never run and every route breaks
+* Do not create this file by default. Use it only for cross-cutting infrastructure that middleware cannot express (structured logging around pipeline phases, tracing, Hono interop), and always delegate to `astro()`
+* Auth and authorization stay in middleware. Do not move them into `fetch.ts` — one visible security boundary, not two
+
 ## ViewTransition
 
-Crumple zone — if it breaks, the page still loads.
+Crumple zone — if transitions break or are unsupported, navigation still works.
 
-```astro
----
-import { ClientRouter } from "astro:transitions";
----
-<head>
-  <ClientRouter />
-</head>
-<body>
-  <Header />
-  <Sidebar />
-  <main>
-    <slot />
-  </main>
-</body>
+Use browser-native cross-document view transitions. Do not add `<ClientRouter />` — it converts the MPA into an SPA at runtime, reintroducing the client-side routing layer this architecture minimizes.
+
+```css
+/* global stylesheet */
+@view-transition {
+  navigation: auto;
+}
 ```
 
-* Add `<ClientRouter />` to the layout. The default crossfade applies to the entire page — no further directives needed
-* `transition:animate` and `transition:name` are unnecessary for the default crossfade. Specifying them generates per-component `view-transition-name` CSS, requiring individual tuning for each targeted Astro component. Omitting them avoids this overhead
-* Use `astro:page-load` instead of `DOMContentLoaded`
-* Never call `history.pushState()` or `history.replaceState()` in islands — ClientRouter stores navigation data in `history.state`. Overwriting it breaks browser back/forward. To update URL query params (filters, pagination), use `navigate()` from `astro:transitions/client` or `<a>` with the new query string
-* Disable when the layout component changes (e.g., login → dashboard) — use `window.location.href` for hard navigation instead of `navigate()`
-* Disable for non-HTML responses
+* The default crossfade applies to the entire page — no per-component directives needed
+* Unsupported browsers (currently Firefox) fall back to standard MPA navigation — experience degradation, not functional failure
+* Every navigation is a full page load. Use `DOMContentLoaded` (or `pagereveal` for transition timing), and write idempotent `<script>` initialization — scripts run on every page load
+* Never call `history.pushState()` or `history.replaceState()` in islands — the URL is a canonical source. To update query params (filters, pagination), use `<a>` or `window.location.assign()` with the new query string
+* Customize with standard CSS only: `view-transition-name`, `::view-transition-old()` / `::view-transition-new()`
 
 ## Project Structure
 
@@ -293,7 +352,8 @@ src/
     {feature}/
       types.ts
       data/                 — data I/O, server-only (backend boundary: swap internals without changing callers). API fetch, file processing, DB queries, storage writes. Only frontmatter and Action handlers call into data/. Islands must not import from this directory
-      components/           — .astro (display) + islands (interaction)
+      components/           — .astro (display) + island wrappers (Action integration)
+        react/              — pure React views (no Astro imports, no framework integration)
   shared/
     layout/                 — AdminLayout, UserLayout
     components/             — project-specific shared components (Pagination, Badge). Built from ui/ primitives
@@ -342,7 +402,9 @@ After applying CRZ principles, review every change against these checks before f
    * Are all exported functions called? Unused initializers, sync functions, or cache hydration calls indicate an over-designed layer.
 4. **Simplicity check**
    * Did the change add a layer, abstraction, or intermediate state? Is that layer actually needed, or does a simpler mechanism (SSR props, direct DOM update, existing browser API) already solve the problem? Remove any layer that exists only to satisfy a principle rather than to solve a real problem.
-5. **Island necessity check**
+5. **Component decomposition check**
+   * Pages hold frontmatter, layout, semantic skeleton, and composition — data display lives in components; a page-level `<script>` only for section-spanning behavior. Every nameable section is extracted; inline HTML remains for the skeleton and nameless glue. The same markup on 2+ pages → promote to `shared/components/` (design-component context). Repeated script wiring marks a missed component boundary. An `.astro` file over ~100 lines needs a boundary search. No pass-through components that only forward props.
+6. **Island necessity check**
    * For each island, list every `useState` call. Can each value be a server prop, URL query param, HTML attribute, CSS rule, or `<script>` DOM call? If yes for all values, the island should be an `.astro` component.
-6. **Document consistency check**
+7. **Document consistency check**
    * Does the change add, remove, or rename a feature, route, or component? If yes, verify that CLAUDE.md, PROJECT.md, and any other project documentation reflect the current state. Deleted features must be removed from documentation.
