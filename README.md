@@ -40,7 +40,7 @@ Every pattern in this catalog has a stated "SPA assumption" — the library or f
 * **localStorage for preferences** — Dark mode only
 * **Popover API / `<dialog>`** — Top layer for overlays, no `z-index` hacks
 * **CSS animations at Layer 2** — `@starting-style`, `interpolate-size`, `::details-content`
-* **ClientRouter** — ViewTransition API for page transitions, `astro:before-swap` for dark mode persistence
+* **Native view transitions** — CSS `@view-transition { navigation: auto }` for cross-document page transitions, no client-side router. An inline `<head>` script applies the dark-mode class on every page load, so preference survives navigation with no swap hook
 
 ## Tech Stack
 

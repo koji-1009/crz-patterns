@@ -1,8 +1,13 @@
+---
+name: sieve
+description: Choose the CSS implementation for Astro projects — styling method (CSS Modules or Tailwind), design tokens, and CSS-layer independence from JavaScript. Use for styling tasks in Astro projects, alongside the crz skill.
+---
+
 # Sieve — Design Implementation Strategy for Astro
 
 Filter design requirements into the right CSS implementation. Styling lives in the CSS layer — independent of JavaScript runtime.
 
-Prerequisite: Astro 6+. Tailwind CSS 4+ when using Tailwind patterns.
+Prerequisite: Astro 7+. Tailwind CSS 4+ when using Tailwind patterns.
 
 Companion skill for [Crumple Zone Architecture](https://github.com/koji-1009/crumple-zone-architecture). CRZ decides component type, state, and security. Sieve decides styling method and tokens.
 

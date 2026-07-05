@@ -75,7 +75,7 @@ const nextHref =
 <script>
   let observer: IntersectionObserver | null = null;
 
-  document.addEventListener("astro:page-load", () => {
+  document.addEventListener("DOMContentLoaded", () => {
     observer?.disconnect();
     const pages = document.getElementById("pages");
     const link = document.getElementById(

@@ -36,6 +36,13 @@
   --color-success: #4ade80;
 }
 
+/* Native cross-document view transitions.
+   Layer-2 crumple zone: unsupported browsers fall back to standard
+   MPA navigation — degraded experience, not functional failure. */
+@view-transition {
+  navigation: auto;
+}
+
 /* Base */
 html {
   font-family: var(--font-sans);
@@ -53,12 +60,4 @@ a {
 
 a:hover {
   text-decoration: underline;
-}
-
-/* Skip view transition animation on back/forward navigation.
-   Safari's back gesture shows its own slide preview — running
-   a view transition on top of that causes a visible double-animation. */
-html[data-astro-transition="back"]::view-transition-old(root),
-html[data-astro-transition="back"]::view-transition-new(root) {
-  animation-duration: 0s !important;
 }
