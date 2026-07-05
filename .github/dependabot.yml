@@ -4,6 +4,9 @@ updates:
     directory: /
     schedule:
       interval: weekly
+      day: saturday
+      time: "08:00"
+      timezone: "Asia/Tokyo"
     groups:
       astro:
         patterns:
@@ -16,3 +19,6 @@ updates:
     directory: /
     schedule:
       interval: weekly
+      day: saturday
+      time: "08:00"
+      timezone: "Asia/Tokyo"
