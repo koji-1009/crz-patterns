@@ -45,7 +45,7 @@ const base = import.meta.env.BASE_URL;
   <script>
     const KEY = "draft-form-data";
 
-    document.addEventListener("astro:page-load", () => {
+    document.addEventListener("DOMContentLoaded", () => {
       const form = document.getElementById(
         "draft-form",
       ) as HTMLFormElement | null;

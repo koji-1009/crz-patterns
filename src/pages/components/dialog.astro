@@ -102,7 +102,7 @@ import PatternLayout from "../../layouts/PatternLayout.astro";
   </style>
 
   <script>
-    document.addEventListener("astro:page-load", () => {
+    document.addEventListener("DOMContentLoaded", () => {
       const dismissible = document.getElementById(
         "dialog-dismissible",
       ) as HTMLDialogElement | null;

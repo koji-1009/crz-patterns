@@ -69,7 +69,7 @@ const images = Array.from({ length: 6 }, (_, i) => i + 1);
   </style>
 
   <script>
-    document.addEventListener("astro:page-load", () => {
+    document.addEventListener("DOMContentLoaded", () => {
       const dialog = document.getElementById(
         "lightbox",
       ) as HTMLDialogElement | null;

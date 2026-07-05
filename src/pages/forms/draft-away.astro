@@ -32,7 +32,7 @@ const base = import.meta.env.BASE_URL;
   </div>
 
   <script>
-    document.addEventListener("astro:page-load", () => {
+    document.addEventListener("DOMContentLoaded", () => {
       const status = document.getElementById(
         "draft-status",
       ) as HTMLElement | null;

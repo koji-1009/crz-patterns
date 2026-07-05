@@ -87,7 +87,7 @@ import PatternLayout from "../../layouts/PatternLayout.astro";
   </ul>
 
   <script>
-    document.addEventListener("astro:page-load", () => {
+    document.addEventListener("DOMContentLoaded", () => {
       let dragged: HTMLElement | null = null;
       const list = document.getElementById(
         "sortable",

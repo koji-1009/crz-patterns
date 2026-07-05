@@ -59,7 +59,7 @@ const base = import.meta.env.BASE_URL;
 <script>
   let observer: IntersectionObserver | null = null;
 
-  document.addEventListener("astro:page-load", () => {
+  document.addEventListener("DOMContentLoaded", () => {
     observer?.disconnect();
     const boxEl = document.getElementById("feed-box");
     const feedEl = document.getElementById("feed");
