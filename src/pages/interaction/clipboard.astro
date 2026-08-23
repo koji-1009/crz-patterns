@@ -12,7 +12,7 @@ const cssSnippet = `.container {
 <PatternLayout
   title="Clipboard Copy"
   assumption="useState + useRef + document.execCommand"
-  technique="navigator.clipboard.writeText() + <script>"
+  technique="custom command (--copy) + navigator.clipboard.writeText()"
   layer="1"
   jsShipped="inline <script> only"
 >
@@ -30,57 +30,70 @@ const cssSnippet = `.container {
   </style>
 
   <div class="grid gap-4 max-w-[500px]">
-    <div class="copy-block">
+    <div>
       <div class="flex items-center justify-between mb-1">
         <span class="text-sm text-muted">JavaScript</span>
         <button
+          type="button"
+          command="--copy"
+          commandfor="snippet-js"
           class="copy-btn text-sm text-primary border border-border rounded-sm px-2 py-0.5 cursor-pointer hover:bg-surface-alt"
           >Copy</button
         >
       </div>
       <pre
+        id="snippet-js"
         class="copy-target p-4 bg-surface-alt rounded-sm overflow-x-auto text-sm">const greeting = "Hello, World!";
 console.log(greeting);</pre>
     </div>
 
-    <div class="copy-block">
+    <div>
       <div class="flex items-center justify-between mb-1">
         <span class="text-sm text-muted">Shell</span>
         <button
+          type="button"
+          command="--copy"
+          commandfor="snippet-shell"
           class="copy-btn text-sm text-primary border border-border rounded-sm px-2 py-0.5 cursor-pointer hover:bg-surface-alt"
           >Copy</button
         >
       </div>
       <pre
+        id="snippet-shell"
         class="copy-target p-4 bg-surface-alt rounded-sm overflow-x-auto text-sm">npm create astro@latest
 cd my-project
 npm run dev</pre>
     </div>
 
-    <div class="copy-block">
+    <div>
       <div class="flex items-center justify-between mb-1">
         <span class="text-sm text-muted">CSS</span>
         <button
+          type="button"
+          command="--copy"
+          commandfor="snippet-css"
           class="copy-btn text-sm text-primary border border-border rounded-sm px-2 py-0.5 cursor-pointer hover:bg-surface-alt"
           >Copy</button
         >
       </div>
       <pre
+        id="snippet-css"
         class="copy-target p-4 bg-surface-alt rounded-sm overflow-x-auto text-sm">{cssSnippet}</pre>
     </div>
   </div>
 
   <script>
     document.addEventListener("DOMContentLoaded", () => {
-      document.querySelectorAll(".copy-block").forEach((block) => {
-        const btn = block.querySelector(
-          ".copy-btn",
-        ) as HTMLButtonElement | null;
-        const target = block.querySelector(
-          ".copy-target",
-        ) as HTMLElement | null;
-        if (!btn || !target) return;
-        btn.addEventListener("click", async () => {
+      // One listener per target, not per button — event.source names the button.
+      document.querySelectorAll(".copy-target").forEach((target) => {
+        target.addEventListener("command", async (event) => {
+          const { command, source } = event as Event & {
+            command: string;
+            source: Element | null;
+          };
+          if (command !== "--copy") return;
+          const btn = source as HTMLButtonElement | null;
+          if (!btn) return;
           await navigator.clipboard.writeText(target.textContent ?? "");
           btn.textContent = "Copied!";
           btn.classList.add("copied");
