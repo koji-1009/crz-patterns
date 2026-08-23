@@ -10,7 +10,10 @@ const base = import.meta.env.BASE_URL;
   layer="1"
   jsShipped="inline <script> only"
 >
-  <form id="draft-form" method="post" action="/forms/draft">
+  <!-- GET back to this page, not POST: GitHub Pages serves static files and
+       has nothing to accept a POST. The action must carry BASE_URL, or the
+       submit leaves the site root and 404s. -->
+  <form id="draft-form" method="get" action={`${base}forms/draft`}>
     <div class="grid gap-4 max-w-[400px]">
       <label
         >Name <input
