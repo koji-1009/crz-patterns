@@ -62,6 +62,11 @@ import PatternLayout from "../../layouts/PatternLayout.astro";
       overflow: visible;
       position: relative;
     }
+    /* Two previews sit on this page, both positioned. Without this the second
+       one wins on tree order and paints over the first one's open dropdown. */
+    .demo-container:has(.hamburger[open]) {
+      z-index: 1;
+    }
     .demo-container.wide {
       width: 100%;
     }

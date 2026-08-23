@@ -50,6 +50,44 @@ const base = import.meta.env.BASE_URL;
       + <a href="https://tailwindcss.com" class="text-primary">Tailwind CSS</a>
     </footer>
     <script is:inline>
+      /* Crumple zone for `closedby`. Chrome 134 and Firefox 141 ship it, but
+         Safari has it in preview only, so released Safari and iOS Safari
+         ignore the attribute: `any` never light-dismisses and `none` never
+         refuses a close request. One project-wide fallback, feature-detected,
+         to be deleted when Safari ships. */
+      (function () {
+        if ("closedBy" in HTMLDialogElement.prototype) return;
+        document.addEventListener("DOMContentLoaded", function () {
+          document.querySelectorAll("dialog[closedby]").forEach(function (d) {
+            var mode = d.getAttribute("closedby");
+            if (mode === "none") {
+              d.addEventListener("cancel", function (e) {
+                e.preventDefault();
+              });
+            } else if (mode === "any") {
+              /* Listen on the dialog itself, not the document: iOS Safari
+                 does not deliver clicks from non-interactive elements to
+                 delegated handlers. A click whose target is the dialog landed
+                 on either its padding or the backdrop, so compare against the
+                 box to tell them apart. */
+              d.addEventListener("click", function (e) {
+                if (e.target !== d) return;
+                var r = d.getBoundingClientRect();
+                if (
+                  e.clientX < r.left ||
+                  e.clientX > r.right ||
+                  e.clientY < r.top ||
+                  e.clientY > r.bottom
+                ) {
+                  d.close();
+                }
+              });
+            }
+          });
+        });
+      })();
+    </script>
+    <script is:inline>
       document.addEventListener("DOMContentLoaded", function () {
         var btn = document.getElementById("theme-btn");
         if (!btn) return;

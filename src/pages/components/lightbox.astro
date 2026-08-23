@@ -37,7 +37,7 @@ const images = Array.from({ length: 6 }, (_, i) => i + 1);
   <dialog
     id="lightbox"
     closedby="any"
-    class="border-none bg-transparent p-0 max-w-[90vw] max-h-[90vh]"
+    class="relative border-none bg-transparent p-0 max-w-[90vw] max-h-[90vh]"
   >
     <img
       id="lightbox-img"
@@ -45,6 +45,16 @@ const images = Array.from({ length: 6 }, (_, i) => i + 1);
       alt=""
       class="rounded-md max-w-[80vw] max-h-[80vh] object-contain"
     />
+    <!-- closedby="any" is an enhancement, so an explicit close control has to
+         stay: without it a browser that ignores the attribute has no way out. -->
+    <button
+      type="button"
+      command="close"
+      commandfor="lightbox"
+      aria-label="Close image"
+      class="absolute top-2 right-2 w-9 h-9 rounded-full border-none bg-black/60 text-white text-xl leading-none cursor-pointer hover:bg-black/80"
+      >&times;</button
+    >
   </dialog>
 
   <style>
