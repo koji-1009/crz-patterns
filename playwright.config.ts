@@ -1,13 +1,18 @@
 import { defineConfig, devices } from "@playwright/test";
 
-const PORT = 4321;
-const BASE_URL = `http://127.0.0.1:${PORT}/crz-patterns/`;
+import { BASE_URL } from "./tests/preview";
 
 export default defineConfig({
   testDir: "./tests",
+  testMatch: "**/*.spec.ts",
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
-  retries: process.env.CI ? 2 : 0,
+  // A whole-run ceiling, so a hang shows up as a failed run in minutes rather
+  // than burning the job's timeout.
+  globalTimeout: process.env.CI ? 15 * 60 * 1000 : 0,
+  // One retry, not two: a suite this size re-running everything three times
+  // costs more than the flake protection is worth.
+  retries: process.env.CI ? 1 : 0,
   // The Playwright docs recommend a single worker on CI for stability. A
   // ubuntu-latest runner has 4 vCPUs, so there is headroom to raise this if
   // the suite ever outgrows its runtime; it does not need it today. Spread
@@ -29,5 +34,3 @@ export default defineConfig({
   globalSetup: "./tests/global-setup.ts",
   globalTeardown: "./tests/global-teardown.ts",
 });
-
-export { BASE_URL, PORT };

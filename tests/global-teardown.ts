@@ -1,9 +1,22 @@
-import { execFileSync } from "node:child_process";
+import { spawnSync } from "node:child_process";
+import { existsSync, readFileSync, rmSync } from "node:fs";
+
+import { PID_FILE } from "./preview";
 
 export default async function globalTeardown() {
-  try {
-    execFileSync("npx", ["astro", "preview", "stop"], { stdio: "inherit" });
-  } catch {
-    // Already stopped, or never started — nothing to clean up.
+  // Covers the daemonised server.
+  spawnSync("npx", ["astro", "preview", "stop"], { stdio: "ignore" });
+
+  // Covers a server that stayed in the foreground instead.
+  if (existsSync(PID_FILE)) {
+    const pid = Number(readFileSync(PID_FILE, "utf8"));
+    if (pid > 0) {
+      try {
+        process.kill(pid, "SIGTERM");
+      } catch {
+        // Already gone.
+      }
+    }
+    rmSync(PID_FILE, { force: true });
   }
 }
