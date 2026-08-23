@@ -6,7 +6,7 @@ const base = import.meta.env.BASE_URL;
 <PatternLayout
   title="Loading Overlay"
   assumption="isLoading useState + Suspense + portal"
-  technique="CSS overlay + <script> state transition + URL canonical source"
+  technique="<dialog> + command/commandfor + closedby + URL canonical source"
   layer="1-2"
   jsShipped="inline <script> only"
 >
@@ -54,7 +54,9 @@ const base = import.meta.env.BASE_URL;
         </select>
       </label>
       <button
-        id="execute-btn"
+        type="button"
+        command="show-modal"
+        commandfor="overlay"
         class="bg-primary text-white border border-primary rounded-sm px-4 py-2 cursor-pointer hover:bg-primary-hover"
         >Execute Action</button
       >
@@ -111,8 +113,8 @@ const base = import.meta.env.BASE_URL;
     </div>
   </div>
 
-  <!-- Overlay -->
-  <dialog id="overlay" class="overlay">
+  <!-- Overlay: closedby="none" refuses Esc while processing, no listener -->
+  <dialog id="overlay" closedby="none" class="overlay">
     <div id="ol-loading" class="overlay-state">
       <div class="spinner"></div>
       <p class="mt-4 text-lg">Processing...</p>
@@ -121,7 +123,9 @@ const base = import.meta.env.BASE_URL;
       <div class="checkmark">&#10003;</div>
       <p class="mt-4 text-lg">Complete!</p>
       <button
-        id="ol-close-success"
+        type="button"
+        command="close"
+        commandfor="overlay"
         class="mt-6 px-4 py-2 border border-white rounded-sm text-white cursor-pointer hover:bg-white/20"
         >Close</button
       >
@@ -131,7 +135,9 @@ const base = import.meta.env.BASE_URL;
       <p class="mt-4 text-lg">Error: ActionError</p>
       <p class="mt-1 text-sm opacity-75">INTERNAL_SERVER_ERROR</p>
       <button
-        id="ol-close-error"
+        type="button"
+        command="close"
+        commandfor="overlay"
         class="mt-6 px-4 py-2 border border-white rounded-sm text-white cursor-pointer hover:bg-white/20"
         >Dismiss</button
       >
@@ -237,9 +243,6 @@ const base = import.meta.env.BASE_URL;
       const cfgAfter = document.getElementById(
         "cfg-after",
       ) as HTMLSelectElement | null;
-      const execBtn = document.getElementById(
-        "execute-btn",
-      ) as HTMLButtonElement | null;
       if (
         !idle ||
         !stateComplete ||
@@ -250,8 +253,7 @@ const base = import.meta.env.BASE_URL;
         !olError ||
         !cfgDelay ||
         !cfgResult ||
-        !cfgAfter ||
-        !execBtn
+        !cfgAfter
       )
         return;
 
@@ -265,20 +267,6 @@ const base = import.meta.env.BASE_URL;
         stateError.classList.remove("hidden");
       }
 
-      // Block Esc during processing
-      overlay.addEventListener("cancel", (e) => e.preventDefault());
-
-      function showOverlay() {
-        olLoading!.classList.remove("hidden");
-        olSuccess!.classList.add("hidden");
-        olError!.classList.add("hidden");
-        overlay!.showModal();
-      }
-
-      function hideOverlay() {
-        overlay!.close();
-      }
-
       function showOverlayResult(success: boolean) {
         olLoading!.classList.add("hidden");
         if (success) {
@@ -288,31 +276,31 @@ const base = import.meta.env.BASE_URL;
         }
       }
 
-      execBtn.addEventListener("click", () => {
+      // The button opens the overlay; this only runs the simulated work.
+      overlay.addEventListener("command", (event) => {
+        const { command } = event as Event & { command: string };
+        if (command !== "show-modal") return;
+
+        olLoading!.classList.remove("hidden");
+        olSuccess!.classList.add("hidden");
+        olError!.classList.add("hidden");
+
         const delay = Number(cfgDelay!.value);
         const result = cfgResult!.value;
         const after = cfgAfter!.value;
-
-        showOverlay();
 
         setTimeout(() => {
           const success = result === "success";
 
           if (after === "navigate") {
-            hideOverlay();
+            // No user action here — a timer fired, so the close is programmatic
+            overlay!.close();
             window.location.assign(`?status=${success ? "complete" : "error"}`);
           } else {
             showOverlayResult(success);
           }
         }, delay);
       });
-
-      document
-        .getElementById("ol-close-success")
-        ?.addEventListener("click", hideOverlay);
-      document
-        .getElementById("ol-close-error")
-        ?.addEventListener("click", hideOverlay);
     });
   </script>
 </PatternLayout>

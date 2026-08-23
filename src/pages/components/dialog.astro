@@ -5,26 +5,31 @@ import PatternLayout from "../../layouts/PatternLayout.astro";
 <PatternLayout
   title="Modal / Dialog"
   assumption="createPortal + useState + focus trap library"
-  technique="<dialog> + showModal() + CSS @starting-style"
+  technique="<dialog> + command/commandfor + closedby + CSS @starting-style"
   layer="1-2"
-  jsShipped="inline <script> only"
+  jsShipped="0 KB"
 >
   <div class="flex gap-3 flex-wrap">
     <button
-      id="open-dismissible"
+      type="button"
+      command="show-modal"
+      commandfor="dialog-dismissible"
       class="bg-primary text-white border border-primary rounded-sm px-4 py-2 cursor-pointer hover:bg-primary-hover"
       >Dismissible Dialog</button
     >
     <button
-      id="open-persistent"
+      type="button"
+      command="show-modal"
+      commandfor="dialog-persistent"
       class="bg-primary text-white border border-primary rounded-sm px-4 py-2 cursor-pointer hover:bg-primary-hover"
       >Persistent Dialog</button
     >
   </div>
 
-  <!-- Dismissible: backdrop click + Esc close -->
+  <!-- Dismissible: closedby="any" gives backdrop click + Esc, no listener -->
   <dialog
     id="dialog-dismissible"
+    closedby="any"
     class="border border-border rounded-md p-6 w-[calc(100%-2rem)] max-w-[400px] bg-surface text-foreground"
   >
     <h2 class="mb-4">Dismissible Dialog</h2>
@@ -33,14 +38,18 @@ import PatternLayout from "../../layouts/PatternLayout.astro";
       informational dialogs.
     </p>
     <button
-      class="dialog-close bg-primary text-white border border-primary rounded-sm px-4 py-2 cursor-pointer hover:bg-primary-hover"
+      type="button"
+      command="close"
+      commandfor="dialog-dismissible"
+      class="bg-primary text-white border border-primary rounded-sm px-4 py-2 cursor-pointer hover:bg-primary-hover"
       >Close</button
     >
   </dialog>
 
-  <!-- Persistent: only close button works -->
+  <!-- Persistent: closedby="none" refuses every close request -->
   <dialog
     id="dialog-persistent"
+    closedby="none"
     class="border border-border rounded-md p-6 w-[calc(100%-2rem)] max-w-[400px] bg-surface text-foreground"
   >
     <h2 class="mb-4">Persistent Dialog</h2>
@@ -52,11 +61,19 @@ import PatternLayout from "../../layouts/PatternLayout.astro";
     </p>
     <div class="flex gap-3">
       <button
-        class="dialog-close border border-border rounded-sm px-4 py-2 cursor-pointer hover:bg-surface-alt"
+        type="button"
+        command="close"
+        commandfor="dialog-persistent"
+        value="cancel"
+        class="border border-border rounded-sm px-4 py-2 cursor-pointer hover:bg-surface-alt"
         >Cancel</button
       >
       <button
-        class="dialog-close bg-primary text-white border border-primary rounded-sm px-4 py-2 cursor-pointer hover:bg-primary-hover"
+        type="button"
+        command="close"
+        commandfor="dialog-persistent"
+        value="confirm"
+        class="bg-primary text-white border border-primary rounded-sm px-4 py-2 cursor-pointer hover:bg-primary-hover"
         >Confirm</button
       >
     </div>
@@ -100,40 +117,4 @@ import PatternLayout from "../../layouts/PatternLayout.astro";
       }
     }
   </style>
-
-  <script>
-    document.addEventListener("DOMContentLoaded", () => {
-      const dismissible = document.getElementById(
-        "dialog-dismissible",
-      ) as HTMLDialogElement | null;
-      const persistent = document.getElementById(
-        "dialog-persistent",
-      ) as HTMLDialogElement | null;
-      if (!dismissible || !persistent) return;
-
-      const openDismissible = document.getElementById("open-dismissible");
-      const openPersistent = document.getElementById("open-persistent");
-
-      // Open
-      openDismissible?.addEventListener("click", () => dismissible.showModal());
-      openPersistent?.addEventListener("click", () => persistent.showModal());
-
-      // Close buttons
-      document.querySelectorAll(".dialog-close").forEach((btn) => {
-        btn.addEventListener("click", () => {
-          (btn.closest("dialog") as HTMLDialogElement).close();
-        });
-      });
-
-      // Dismissible: backdrop click closes
-      dismissible.addEventListener("click", (e) => {
-        if (e.target === dismissible) dismissible.close();
-      });
-
-      // Persistent: block Esc key
-      persistent.addEventListener("cancel", (e) => {
-        e.preventDefault();
-      });
-    });
-  </script>
 </PatternLayout>

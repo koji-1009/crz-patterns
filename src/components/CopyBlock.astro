@@ -1,0 +1,60 @@
+---
+interface Props {
+  label: string;
+  id: string;
+  code: string;
+}
+const { label, id, code } = Astro.props;
+---
+
+<div>
+  <div class="flex items-center justify-between mb-1">
+    <span class="text-sm text-muted">{label}</span>
+    <button
+      type="button"
+      command="--copy"
+      commandfor={id}
+      class="copy-btn text-sm text-primary border border-border rounded-sm px-2 py-0.5 cursor-pointer hover:bg-surface-alt"
+      >Copy</button
+    >
+  </div>
+  <pre
+    id={id}
+    class="copy-target p-4 bg-surface-alt rounded-sm overflow-x-auto text-sm">{code}</pre>
+</div>
+
+<style>
+  .copy-btn {
+    transition:
+      background-color 0.2s ease,
+      color 0.2s ease;
+  }
+  .copy-btn.copied {
+    background-color: var(--color-success);
+    color: #fff;
+    border-color: var(--color-success);
+  }
+</style>
+
+<script>
+  // Runs once for every instance — the listener lives on the copy target,
+  // and event.source gives back whichever button was pressed.
+  document.querySelectorAll(".copy-target").forEach((target) => {
+    target.addEventListener("command", async (event) => {
+      const { command, source } = event as Event & {
+        command: string;
+        source: Element | null;
+      };
+      if (command !== "--copy") return;
+      const btn = source as HTMLButtonElement | null;
+      if (!btn) return;
+      await navigator.clipboard.writeText(target.textContent ?? "");
+      btn.textContent = "Copied!";
+      btn.classList.add("copied");
+      setTimeout(() => {
+        btn.textContent = "Copy";
+        btn.classList.remove("copied");
+      }, 2000);
+    });
+  });
+</script>
