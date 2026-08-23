@@ -34,6 +34,11 @@ const { label, id, code } = Astro.props;
     color: #fff;
     border-color: var(--color-success);
   }
+  .copy-btn.failed {
+    background-color: var(--color-danger);
+    color: #fff;
+    border-color: var(--color-danger);
+  }
 </style>
 
 <script>
@@ -48,12 +53,22 @@ const { label, id, code } = Astro.props;
       if (command !== "--copy") return;
       const btn = source as HTMLButtonElement | null;
       if (!btn) return;
-      await navigator.clipboard.writeText(target.textContent ?? "");
-      btn.textContent = "Copied!";
-      btn.classList.add("copied");
+
+      // writeText rejects when the clipboard is refused (permission policy,
+      // an insecure origin, a locked-down browser). Without this catch the
+      // rejection ends the handler and the button silently does nothing.
+      let ok = true;
+      try {
+        await navigator.clipboard.writeText(target.textContent ?? "");
+      } catch {
+        ok = false;
+      }
+
+      btn.textContent = ok ? "Copied!" : "Copy failed";
+      btn.classList.add(ok ? "copied" : "failed");
       setTimeout(() => {
         btn.textContent = "Copy";
-        btn.classList.remove("copied");
+        btn.classList.remove("copied", "failed");
       }, 2000);
     });
   });
