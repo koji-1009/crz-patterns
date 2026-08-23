@@ -12,8 +12,6 @@ concurrency:
 
 jobs:
   test:
-    # The suite runs in well under a minute; the docs' 60 is a blast radius,
-    # not a budget.
     timeout-minutes: 20
     runs-on: ubuntu-latest
     steps:
