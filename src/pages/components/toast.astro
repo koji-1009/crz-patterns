@@ -45,6 +45,10 @@ import PatternLayout from "../../layouts/PatternLayout.astro";
   </div>
 
   <style>
+    /* `display` belongs on the open state only. Declaring it here would beat
+       the UA rule that gives a closed popover `display: none`, leaving the
+       toast in the layout and accessibility tree — an aria-live region still
+       holding the last message — merely faded to opacity 0. */
     .toast {
       position: fixed;
       top: 0.5rem;
@@ -52,7 +56,6 @@ import PatternLayout from "../../layouts/PatternLayout.astro";
       transform: translateX(-50%) translateY(-1rem);
       margin: 0;
       border: none;
-      display: flex;
       align-items: center;
       gap: 0.5rem;
       padding: 1rem 1.5rem;
@@ -67,6 +70,7 @@ import PatternLayout from "../../layouts/PatternLayout.astro";
         overlay 0.3s ease allow-discrete;
     }
     .toast:popover-open {
+      display: flex;
       opacity: 1;
       transform: translateX(-50%) translateY(0);
     }
