@@ -61,3 +61,18 @@ a {
 a:hover {
   text-decoration: underline;
 }
+
+/* showModal() makes the rest of the page inert but leaves it scrollable.
+   Every dialog in this catalog is modal, so locking the document while one
+   is open is safe here. Without it iOS Safari scrolls and rubber-bands the
+   page behind the backdrop. */
+html:has(dialog[open]) {
+  overflow: hidden;
+}
+
+/* Keep a scroll gesture that starts inside an overlay from chaining out to
+   the document once the overlay hits its own end. */
+dialog,
+[popover] {
+  overscroll-behavior: contain;
+}
