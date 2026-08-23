@@ -45,7 +45,7 @@ Every pattern in this catalog has a stated "SPA assumption" — the library or f
 
 ## Tech Stack
 
-* [Astro](https://astro.build/) 6 — Static output for GitHub Pages
+* [Astro](https://astro.build/) 7 — Static output for GitHub Pages
 * [Tailwind CSS](https://tailwindcss.com/) 4 — `@theme` tokens, no `@apply`
 * No runtime dependencies beyond Astro and Tailwind
 
