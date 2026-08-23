@@ -19,16 +19,16 @@ Every pattern in this catalog has a stated "SPA assumption" — the library or f
 | Multi-step Form   | useState + Router                    | sessionStorage + URL path            |
 | Tabs              | useState + onClick                   | URL path + Astro component           |
 | Accordion         | useState + toggle                    | `<details>` + `interpolate-size`     |
-| Dialog            | createPortal + useState + focus trap | `<dialog>` + `@starting-style`       |
+| Dialog            | createPortal + useState + focus trap | `<dialog>` + `command`/`commandfor` + `closedby` |
 | Tooltip           | Tippy.js / Floating UI               | CSS `:hover` + `::after`             |
-| Toast             | react-toastify                       | Popover API + CSS transition         |
+| Toast             | react-toastify                       | Popover API + `command`/`commandfor` |
 | Carousel          | Swiper.js                            | CSS `scroll-snap-type`               |
-| Lightbox          | react-lightbox                       | `<dialog>` + CSS fade                |
+| Lightbox          | react-lightbox                       | `<dialog>` + `command`/`commandfor`  |
 | Hamburger Menu    | useState + toggle + click-outside    | `<details>` + container query        |
 | Dark Mode         | ThemeProvider + Context              | CSS custom properties + localStorage |
-| Loading Overlay   | isLoading useState + Suspense        | `<dialog>` + URL state               |
+| Loading Overlay   | isLoading useState + Suspense        | `<dialog>` + `closedby` + URL state  |
 | Drag & Drop       | dnd-kit / react-beautiful-dnd        | HTML5 Drag and Drop API              |
-| Clipboard         | useState + useRef                    | `navigator.clipboard`                |
+| Clipboard         | useState + useRef                    | Custom command (`--copy`) + `navigator.clipboard` |
 | Infinite Scroll (Feed) | useInfiniteQuery + react-infinite-scroll-component | IntersectionObserver + fetch + `<template>` |
 | Seamless Pagination | SPA router + client-side query cache | Static pages + IntersectionObserver + `DOMParser` + `replaceState` |
 
@@ -39,6 +39,7 @@ Every pattern in this catalog has a stated "SPA assumption" — the library or f
 * **sessionStorage for drafts** — Multi-step form and draft persistence
 * **localStorage for preferences** — Dark mode only
 * **Popover API / `<dialog>`** — Top layer for overlays, no `z-index` hacks
+* **Declarative invocation** — `command` / `commandfor` bind a button to its dialog or popover in markup. The binding exists as soon as the element is parsed, so no click is lost waiting for a listener. `closedby="any"` gives light dismiss and `closedby="none"` refuses Esc, both without a `cancel` handler. Where a script still runs, it listens on the target and reads `event.source` — the browser owns the invocation, the script only owns what happens next
 * **CSS animations at Layer 2** — `@starting-style`, `interpolate-size`, `::details-content`
 * **Native view transitions** — CSS `@view-transition { navigation: auto }` for cross-document page transitions, no client-side router. An inline `<head>` script applies the dark-mode class on every page load, so preference survives navigation with no swap hook
 
