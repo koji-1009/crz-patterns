@@ -1,0 +1,19 @@
+---
+import type { HTMLAttributes } from "astro/types";
+
+// The <option> elements come through the slot.
+type Props = HTMLAttributes<"select"> & {
+  label: string;
+};
+const { label, ...attrs } = Astro.props;
+---
+
+<label>
+  {label}
+  <select
+    {...attrs}
+    class="border border-border rounded-sm p-2 bg-surface w-full mt-1"
+  >
+    <slot />
+  </select>
+</label>

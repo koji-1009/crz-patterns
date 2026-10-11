@@ -1,4 +1,6 @@
 ---
+import PrimaryLink from "./PrimaryLink.astro";
+
 interface Props {
   status: "complete" | "error";
   resetHref: string;
@@ -39,10 +41,6 @@ const ok = status === "complete";
         </p>
       )
     }
-    <a
-      href={resetHref}
-      class="inline-block bg-primary text-on-primary border border-primary rounded-sm px-4 py-2 no-underline hover:bg-primary-hover"
-      >{ok ? "Reset" : "Retry"}</a
-    >
+    <PrimaryLink href={resetHref}>{ok ? "Reset" : "Retry"}</PrimaryLink>
   </div>
 </div>

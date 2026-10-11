@@ -1,0 +1,56 @@
+/* Base styles. Inside @layer base so Tailwind utilities (in @layer utilities)
+   can override them — unlayered rules would beat every utility regardless of
+   specificity. */
+@layer base {
+  :root {
+    color-scheme: light dark;
+  }
+
+  :root.light {
+    color-scheme: light;
+  }
+
+  :root.dark {
+    color-scheme: dark;
+  }
+
+  html {
+    font-family: var(--font-sans);
+  }
+
+  body {
+    max-width: 960px;
+    margin: 0 auto;
+    min-height: 100vh;
+  }
+
+  a {
+    text-decoration: none;
+  }
+
+  a:hover {
+    text-decoration: underline;
+  }
+
+  /* showModal() makes the rest of the page inert but leaves it scrollable.
+     Every dialog in this catalog is modal, so locking the document while one
+     is open is safe here. Without it iOS Safari scrolls and rubber-bands the
+     page behind the backdrop. */
+  html:has(dialog[open]) {
+    overflow: hidden;
+  }
+
+  /* Keep a scroll gesture that starts inside an overlay from chaining out to
+     the document once the overlay hits its own end. */
+  dialog,
+  [popover] {
+    overscroll-behavior: contain;
+  }
+}
+
+/* Native cross-document view transitions.
+   Layer-2 crumple zone: unsupported browsers fall back to standard
+   MPA navigation — degraded experience, not functional failure. */
+@view-transition {
+  navigation: auto;
+}

@@ -1,5 +1,6 @@
 ---
 import PrimaryButton from "../../../components/PrimaryButton.astro";
+import SecondaryLink from "../../../components/SecondaryLink.astro";
 import PatternLayout from "../../../layouts/PatternLayout.astro";
 const base = import.meta.env.BASE_URL;
 ---
@@ -18,9 +19,8 @@ const base = import.meta.env.BASE_URL;
   >
   </div>
   <div class="flex gap-4">
-    <a
-      href={`${base}forms/multi-step/step2`}
-      class="px-4 py-2 border border-border rounded-sm">&larr; Back</a
+    <SecondaryLink href={`${base}forms/multi-step/step2`}
+      >&larr; Back</SecondaryLink
     >
     <PrimaryButton id="submit-btn">Confirm & Submit</PrimaryButton>
   </div>

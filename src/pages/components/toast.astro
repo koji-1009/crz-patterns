@@ -1,6 +1,14 @@
 ---
 import Toast from "../../components/Toast.astro";
 import PatternLayout from "../../layouts/PatternLayout.astro";
+
+// Full class strings, not built from the type name: Tailwind only generates
+// utilities it can find written out in the source.
+const triggers = [
+  { type: "success", label: "Success", color: "bg-success text-on-success border-success" },
+  { type: "error", label: "Error", color: "bg-danger text-on-danger border-danger" },
+  { type: "info", label: "Info", color: "bg-primary text-on-primary border-primary" },
+];
 ---
 
 <PatternLayout
@@ -11,27 +19,19 @@ import PatternLayout from "../../layouts/PatternLayout.astro";
   jsShipped="inline <script> only"
 >
   <div class="flex gap-3 flex-wrap">
-    <button
-      type="button"
-      command="show-popover"
-      commandfor="toast"
-      class="bg-success text-on-success border border-success rounded-sm px-4 py-2 cursor-pointer"
-      data-type="success">Success</button
-    >
-    <button
-      type="button"
-      command="show-popover"
-      commandfor="toast"
-      class="bg-danger text-on-danger border border-danger rounded-sm px-4 py-2 cursor-pointer"
-      data-type="error">Error</button
-    >
-    <button
-      type="button"
-      command="show-popover"
-      commandfor="toast"
-      class="bg-primary text-on-primary border border-primary rounded-sm px-4 py-2 cursor-pointer"
-      data-type="info">Info</button
-    >
+    {
+      triggers.map((t) => (
+        <button
+          type="button"
+          command="show-popover"
+          commandfor="toast"
+          class:list={["border rounded-sm px-4 py-2 cursor-pointer", t.color]}
+          data-type={t.type}
+        >
+          {t.label}
+        </button>
+      ))
+    }
   </div>
 
   <Toast id="toast" />

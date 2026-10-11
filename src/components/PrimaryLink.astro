@@ -1,0 +1,19 @@
+---
+import type { HTMLAttributes } from "astro/types";
+
+// Navigation that carries the primary emphasis. It stays an <a>; only the
+// fill matches PrimaryButton.
+type Props = HTMLAttributes<"a"> & { href: string };
+
+const { class: extra, ...attrs } = Astro.props;
+---
+
+<a
+  {...attrs}
+  class:list={[
+    "inline-block bg-primary text-on-primary border border-primary rounded-sm px-4 py-2 no-underline hover:bg-primary-hover",
+    extra,
+  ]}
+>
+  <slot />
+</a>
