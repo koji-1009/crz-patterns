@@ -9,7 +9,7 @@ const { summary, open = false } = Astro.props;
 <!-- interpolate-size lets ::details-content transition to height: auto -->
 <details
   open={open}
-  class="border border-border rounded-sm [interpolate-size:allow-keywords] details-content:h-0 details-content:overflow-hidden details-content:transition-[height] details-content:duration-300 details-content:ease-[ease] open:details-content:h-auto"
+  class="border border-border rounded-sm [interpolate-size:allow-keywords] details-content:h-0 details-content:overflow-hidden details-content:transition-[height] details-content:duration-300 open:details-content:h-auto"
 >
   <summary class="cursor-pointer p-3 bg-surface-alt font-semibold"
     >{summary}</summary

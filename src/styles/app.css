@@ -1,4 +1,11 @@
-@import "tailwindcss";
+/* Scan src/ only: without source(), Tailwind also reads tests, workflows and
+   docs, and turns plain words there ("static", "visible") into utilities. */
+@import "tailwindcss" source("../");
+@import "./global.css";
+
+/* Words in prose and comments under src/ that happen to be utility names.
+   None of them is used as a class. */
+@source not inline("container inline static transition visible");
 
 /* Theme follows the OS through `color-scheme` with no script. A stored
    preference pins it by adding `.light` or `.dark` to <html>. */
@@ -40,7 +47,9 @@
   --radius-sm: 4px;
   --radius-md: 8px;
 
-  /* Motion */
+  /* Motion — the CSS `ease` keyword as the default for every transition
+     utility, instead of repeating ease-[ease] */
+  --default-transition-timing-function: ease;
   --animate-pop: pop 0.3s ease;
   --animate-fade-in-out: fade-in-out 3s ease forwards;
 
@@ -70,57 +79,4 @@
       opacity: 0;
     }
   }
-}
-
-:root {
-  color-scheme: light dark;
-}
-
-:root.light {
-  color-scheme: light;
-}
-
-:root.dark {
-  color-scheme: dark;
-}
-
-/* Native cross-document view transitions.
-   Layer-2 crumple zone: unsupported browsers fall back to standard
-   MPA navigation — degraded experience, not functional failure. */
-@view-transition {
-  navigation: auto;
-}
-
-/* Base */
-html {
-  font-family: var(--font-sans);
-}
-
-body {
-  max-width: 960px;
-  margin: 0 auto;
-  min-height: 100vh;
-}
-
-a {
-  text-decoration: none;
-}
-
-a:hover {
-  text-decoration: underline;
-}
-
-/* showModal() makes the rest of the page inert but leaves it scrollable.
-   Every dialog in this catalog is modal, so locking the document while one
-   is open is safe here. Without it iOS Safari scrolls and rubber-bands the
-   page behind the backdrop. */
-html:has(dialog[open]) {
-  overflow: hidden;
-}
-
-/* Keep a scroll gesture that starts inside an overlay from chaining out to
-   the document once the overlay hits its own end. */
-dialog,
-[popover] {
-  overscroll-behavior: contain;
 }

@@ -1,6 +1,7 @@
 ---
 import FormField from "./FormField.astro";
 import PrimaryButton from "./PrimaryButton.astro";
+import TextAreaField from "./TextAreaField.astro";
 
 interface Props {
   action: string;
@@ -15,13 +16,7 @@ const { action } = Astro.props;
   <div class="grid gap-4 max-w-[400px]">
     <FormField label="Name" type="text" name="name" />
     <FormField label="Email" type="email" name="email" />
-    <label
-      >Message <textarea
-        name="message"
-        rows="3"
-        class="border border-border rounded-sm p-2 bg-surface w-full mt-1"
-      ></textarea></label
-    >
+    <TextAreaField label="Message" name="message" rows={3} />
     <PrimaryButton type="submit">Submit</PrimaryButton>
   </div>
 </form>

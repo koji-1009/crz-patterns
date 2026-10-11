@@ -1,0 +1,12 @@
+---
+import type { HTMLAttributes } from "astro/types";
+
+// Outlined navigation for the lesser action next to a primary one.
+type Props = HTMLAttributes<"a"> & { href: string };
+
+const { class: extra, ...attrs } = Astro.props;
+---
+
+<a {...attrs} class:list={["px-4 py-2 border border-border rounded-sm", extra]}>
+  <slot />
+</a>

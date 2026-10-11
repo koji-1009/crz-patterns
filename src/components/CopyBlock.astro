@@ -14,7 +14,7 @@ const { label, id, code } = Astro.props;
       type="button"
       command="--copy"
       commandfor={id}
-      class="copy-btn text-sm text-primary border border-border rounded-sm px-2 py-0.5 cursor-pointer hover:bg-surface-alt transition-colors duration-200 ease-[ease] data-[state=copied]:bg-success data-[state=copied]:text-on-success data-[state=copied]:border-success data-[state=failed]:bg-danger data-[state=failed]:text-on-danger data-[state=failed]:border-danger"
+      class="copy-btn text-sm text-primary border border-border rounded-sm px-2 py-0.5 cursor-pointer hover:bg-surface-alt transition-colors duration-200 data-[state=copied]:bg-success data-[state=copied]:text-on-success data-[state=copied]:border-success data-[state=failed]:bg-danger data-[state=failed]:text-on-danger data-[state=failed]:border-danger"
       >Copy</button
     >
   </div>
