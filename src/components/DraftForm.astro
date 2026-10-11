@@ -1,0 +1,73 @@
+---
+import FormField from "./FormField.astro";
+import PrimaryButton from "./PrimaryButton.astro";
+
+interface Props {
+  action: string;
+}
+const { action } = Astro.props;
+---
+
+<!-- GET back to this page, not POST: GitHub Pages serves static files and
+     has nothing to accept a POST. The action must carry BASE_URL, or the
+     submit leaves the site root and 404s. -->
+<form id="draft-form" method="get" action={action}>
+  <div class="grid gap-4 max-w-[400px]">
+    <FormField label="Name" type="text" name="name" />
+    <FormField label="Email" type="email" name="email" />
+    <label
+      >Message <textarea
+        name="message"
+        rows="3"
+        class="border border-border rounded-sm p-2 bg-surface w-full mt-1"
+      ></textarea></label
+    >
+    <PrimaryButton type="submit">Submit</PrimaryButton>
+  </div>
+</form>
+
+<script>
+  const KEY = "draft-form-data";
+
+  document.addEventListener("DOMContentLoaded", () => {
+    const form = document.getElementById(
+      "draft-form",
+    ) as HTMLFormElement | null;
+    if (!form) return;
+
+    // Restore
+    const saved = sessionStorage.getItem(KEY);
+    if (saved) {
+      const data = JSON.parse(saved);
+      for (const [name, value] of Object.entries(data)) {
+        const el = form.elements.namedItem(name);
+        if (
+          el instanceof HTMLInputElement ||
+          el instanceof HTMLTextAreaElement
+        ) {
+          el.value = value as string;
+        }
+      }
+    }
+
+    // Save on input
+    form.addEventListener("input", () => {
+      const data: Record<string, string> = {};
+      for (const el of form.elements) {
+        if (
+          (el instanceof HTMLInputElement ||
+            el instanceof HTMLTextAreaElement) &&
+          el.name
+        ) {
+          data[el.name] = el.value;
+        }
+      }
+      sessionStorage.setItem(KEY, JSON.stringify(data));
+    });
+
+    // Clear on submit
+    form.addEventListener("submit", () => {
+      sessionStorage.removeItem(KEY);
+    });
+  });
+</script>

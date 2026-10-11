@@ -1,0 +1,41 @@
+---
+import PrimaryButton from "./PrimaryButton.astro";
+
+interface Props {
+  overlayId: string;
+}
+const { overlayId } = Astro.props;
+const select =
+  "block mt-1 border border-border rounded-sm p-2 bg-surface w-full";
+---
+
+<div id="state-idle">
+  <h3 class="mb-4">Action Settings</h3>
+  <div class="grid gap-4 max-w-[400px]">
+    <label>
+      Delay
+      <select id="cfg-delay" class={select}>
+        <option value="300">300ms</option>
+        <option value="1000" selected>1 sec</option>
+        <option value="3000">3 sec</option>
+      </select>
+    </label>
+    <label>
+      Result
+      <select id="cfg-result" class={select}>
+        <option value="success">Success</option>
+        <option value="error">Error (ActionError)</option>
+      </select>
+    </label>
+    <label>
+      After completion
+      <select id="cfg-after" class={select}>
+        <option value="overlay">Show in overlay, then close</option>
+        <option value="navigate">Navigate with ?status= (URL canonical)</option>
+      </select>
+    </label>
+    <PrimaryButton command="show-modal" commandfor={overlayId}
+      >Execute Action</PrimaryButton
+    >
+  </div>
+</div>

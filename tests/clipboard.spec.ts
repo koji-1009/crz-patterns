@@ -56,7 +56,7 @@ test("a refused clipboard write reports a failure instead of nothing", async ({
   const btn = page.locator(".copy-btn").first();
   await btn.click();
   await expect(btn).toHaveText("Copy failed");
-  await expect(btn).toHaveClass(/failed/);
+  await expect(btn).toHaveAttribute("data-state", "failed");
 });
 
 // Reading the clipboard back needs a permission only Chromium grants here.

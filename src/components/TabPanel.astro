@@ -24,10 +24,7 @@ const panels: Record<string, { title: string; content: string }> = {
 const panel = panels[tab] ?? panels.a!;
 ---
 
-<section
-  class="p-4 border border-border border-t-0 rounded-b-sm"
-  role="tabpanel"
->
+<section class="p-4 border border-border border-t-0 rounded-b-sm">
   <h3>{panel.title}</h3>
   <p>{panel.content}</p>
 </section>

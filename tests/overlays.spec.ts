@@ -12,8 +12,8 @@ test.describe("toast", () => {
 
     await page.getByRole("button", { name: "Error" }).click();
     await expect(toast).toBeVisible();
-    await expect(toast).toHaveClass(/error/);
-    await expect(page.locator("#toast-msg")).toHaveText(
+    await expect(toast).toHaveAttribute("data-type", "error");
+    await expect(toast.locator("[data-toast-msg]")).toHaveText(
       "Something went wrong.",
     );
   });
@@ -22,10 +22,9 @@ test.describe("toast", () => {
     page,
   }) => {
     await page.getByRole("button", { name: "Success" }).click();
-    await expect(page.locator("#toast")).toHaveClass(/success/);
+    await expect(page.locator("#toast")).toHaveAttribute("data-type", "success");
     await page.getByRole("button", { name: "Info" }).click();
-    await expect(page.locator("#toast")).toHaveClass(/info/);
-    await expect(page.locator("#toast")).not.toHaveClass(/success/);
+    await expect(page.locator("#toast")).toHaveAttribute("data-type", "info");
   });
 
   test("the toast hides itself again", async ({ page }) => {

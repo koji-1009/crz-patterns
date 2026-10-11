@@ -1,0 +1,116 @@
+---
+import FeedItem from "./FeedItem.astro";
+import type { FeedItem as Item } from "../data/feed";
+
+interface Props {
+  page: number;
+  totalPages: number;
+  items: Item[];
+  nextHref: string | null;
+}
+const { page, totalPages, items, nextHref } = Astro.props;
+---
+
+<p class="text-sm text-muted mb-2">
+  Page <span id="page-indicator">{page}</span> of {totalPages} — watch the URL
+  advance as you scroll.
+</p>
+<!-- The script fetches the next page's HTML and moves this container's
+     children across, so its structure is the contract between pages. -->
+<div id="pages">
+  {
+    page > 1 && (
+      <p class="-mx-4 my-4 py-2 bg-surface-alt border-y border-border text-center text-sm text-muted uppercase tracking-wide font-bold">
+        Page {page}
+      </p>
+    )
+  }
+  <ul class="border border-border rounded-md bg-surface">
+    {items.map((item) => <FeedItem item={item} />)}
+  </ul>
+</div>
+{
+  nextHref ? (
+    <a
+      id="load-more"
+      href={nextHref}
+      class="flex h-14 items-center justify-center text-primary"
+    >
+      Load more
+    </a>
+  ) : (
+    <p
+      id="list-end"
+      class="flex h-14 items-center justify-center text-sm text-muted"
+    >
+      — End of list —
+    </p>
+  )
+}
+
+<script>
+  let observer: IntersectionObserver | null = null;
+
+  document.addEventListener("DOMContentLoaded", () => {
+    observer?.disconnect();
+    const pages = document.getElementById("pages");
+    const link = document.getElementById(
+      "load-more",
+    ) as HTMLAnchorElement | null;
+    const indicator = document.getElementById("page-indicator");
+    if (!pages || !link) return;
+
+    let loading = false;
+
+    async function loadNext() {
+      if (loading || !pages || !link) return;
+      loading = true;
+      const pageHref = link.href;
+      try {
+        const res = await fetch(pageHref);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const doc = new DOMParser().parseFromString(
+          await res.text(),
+          "text/html",
+        );
+        // Each fetched page contributes its divider band and its own card
+        const chunks = doc.querySelectorAll("#pages > *");
+        if (chunks.length === 0) throw new Error("unexpected response");
+        for (const el of chunks) pages.appendChild(el);
+        history.replaceState(null, "", pageHref);
+        if (indicator) {
+          const page = new URL(pageHref).pathname.split("/").filter(Boolean).pop();
+          if (page) indicator.textContent = page;
+        }
+        const nextLink = doc.getElementById("load-more");
+        const nextHref = nextLink?.getAttribute("href");
+        if (nextHref) {
+          link.href = new URL(nextHref, pageHref).href;
+          // Re-observe so the callback fires again if the link is still in view
+          observer?.unobserve(link);
+          observer?.observe(link);
+        } else {
+          observer?.disconnect();
+          const end = doc.getElementById("list-end");
+          if (end) link.replaceWith(end);
+          else link.remove();
+        }
+      } catch {
+        // Crumple zone: stop auto-loading; the link keeps working as plain navigation
+        observer?.disconnect();
+        link.textContent = "Load more (auto-load unavailable)";
+      } finally {
+        loading = false;
+      }
+    }
+
+    observer = new IntersectionObserver(
+      (entries) => {
+        if (entries.some((e) => e.isIntersecting)) loadNext();
+      },
+      // Wide margin: splice in the next page well before the list bottom is visible
+      { rootMargin: "600px" },
+    );
+    observer.observe(link);
+  });
+</script>

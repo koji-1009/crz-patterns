@@ -1,0 +1,14 @@
+{
+  "extraKnownMarketplaces": {
+    "crumple-zone-architecture": {
+      "source": {
+        "source": "github",
+        "repo": "koji-1009/crumple-zone-architecture"
+      }
+    }
+  },
+  "enabledPlugins": {
+    "crz@crumple-zone-architecture": true,
+    "sieve@crumple-zone-architecture": true
+  }
+}

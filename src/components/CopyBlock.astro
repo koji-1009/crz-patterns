@@ -14,7 +14,7 @@ const { label, id, code } = Astro.props;
       type="button"
       command="--copy"
       commandfor={id}
-      class="copy-btn text-sm text-primary border border-border rounded-sm px-2 py-0.5 cursor-pointer hover:bg-surface-alt"
+      class="copy-btn text-sm text-primary border border-border rounded-sm px-2 py-0.5 cursor-pointer hover:bg-surface-alt transition-colors duration-200 ease-[ease] data-[state=copied]:bg-success data-[state=copied]:text-on-success data-[state=copied]:border-success data-[state=failed]:bg-danger data-[state=failed]:text-on-danger data-[state=failed]:border-danger"
       >Copy</button
     >
   </div>
@@ -22,24 +22,6 @@ const { label, id, code } = Astro.props;
     id={id}
     class="copy-target p-4 bg-surface-alt rounded-sm overflow-x-auto text-sm">{code}</pre>
 </div>
-
-<style>
-  .copy-btn {
-    transition:
-      background-color 0.2s ease,
-      color 0.2s ease;
-  }
-  .copy-btn.copied {
-    background-color: var(--color-success);
-    color: #fff;
-    border-color: var(--color-success);
-  }
-  .copy-btn.failed {
-    background-color: var(--color-danger);
-    color: #fff;
-    border-color: var(--color-danger);
-  }
-</style>
 
 <script>
   // Runs once for every instance — the listener lives on the copy target,
@@ -65,10 +47,10 @@ const { label, id, code } = Astro.props;
       }
 
       btn.textContent = ok ? "Copied!" : "Copy failed";
-      btn.classList.add(ok ? "copied" : "failed");
+      btn.dataset.state = ok ? "copied" : "failed";
       setTimeout(() => {
         btn.textContent = "Copy";
-        btn.classList.remove("copied", "failed");
+        delete btn.dataset.state;
       }, 2000);
     });
   });

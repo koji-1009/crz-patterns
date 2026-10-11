@@ -1,0 +1,19 @@
+---
+interface Props {
+  id: string;
+  title: string;
+  closedby: "any" | "none";
+}
+const { id, title, closedby } = Astro.props;
+---
+
+<!-- Fades and scales in from @starting-style; `display` and `overlay` are
+     transitioned as discrete properties so the exit animates too. -->
+<dialog
+  id={id}
+  closedby={closedby}
+  class="m-auto border border-border rounded-md p-6 w-[calc(100%-2rem)] max-w-[400px] bg-surface text-foreground opacity-0 scale-95 transition-[opacity,scale,display,overlay] duration-200 ease-[ease] transition-discrete open:opacity-100 open:scale-100 starting:open:opacity-0 starting:open:scale-95 backdrop:bg-black/0 backdrop:transition-[background-color,display,overlay] backdrop:duration-200 backdrop:ease-[ease] backdrop:transition-discrete open:backdrop:bg-black/50 starting:open:backdrop:bg-black/0"
+>
+  <h2 class="mb-4">{title}</h2>
+  <slot />
+</dialog>

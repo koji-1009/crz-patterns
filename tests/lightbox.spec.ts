@@ -40,7 +40,10 @@ test("a thumbnail opens the lightbox with that thumbnail's image", async ({
 
 test("the image reports as loaded once it arrives", async ({ page }) => {
   await page.getByRole("button", { name: "Open image 1" }).click();
-  await expect(page.locator("#lightbox-img")).toHaveClass(/loaded/);
+  await expect(page.locator("#lightbox-img")).toHaveAttribute(
+    "data-loaded",
+    "",
+  );
 });
 
 test("opening a second thumbnail swaps the image", async ({ page }) => {

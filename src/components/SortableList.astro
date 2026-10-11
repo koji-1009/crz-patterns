@@ -1,0 +1,61 @@
+---
+interface Props {
+  items: string[];
+}
+const { items } = Astro.props;
+---
+
+<ul id="sortable" class="list-none p-0 max-w-[400px] grid gap-2">
+  {
+    items.map((label, i) => (
+      <li
+        draggable="true"
+        class="flex items-center gap-3 py-3 px-4 bg-surface-alt border border-border rounded-sm cursor-grab active:cursor-grabbing [transition:opacity_0.2s_ease,transform_0.15s_ease] data-dragging:opacity-40"
+      >
+        <span class="pos font-mono text-muted text-sm w-6">{i + 1}.</span>
+        <span>{label}</span>
+      </li>
+    ))
+  }
+</ul>
+
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    let dragged: HTMLElement | null = null;
+    const list = document.getElementById(
+      "sortable",
+    ) as HTMLUListElement | null;
+    if (!list) return;
+
+    function updatePositions() {
+      list!.querySelectorAll(".pos").forEach((el, i) => {
+        el.textContent = `${i + 1}.`;
+      });
+    }
+
+    list.addEventListener("dragstart", (e) => {
+      dragged = e.target as HTMLElement;
+      dragged.dataset.dragging = "";
+    });
+
+    list.addEventListener("dragend", (e) => {
+      delete (e.target as HTMLElement).dataset.dragging;
+      dragged = null;
+      updatePositions();
+    });
+
+    list.addEventListener("dragover", (e) => {
+      e.preventDefault();
+      const target = (e.target as HTMLElement).closest("li");
+      if (target && dragged && target !== dragged) {
+        const rect = target.getBoundingClientRect();
+        const mid = rect.top + rect.height / 2;
+        if (e.clientY < mid) {
+          list.insertBefore(dragged, target);
+        } else {
+          list.insertBefore(dragged, target.nextSibling);
+        }
+      }
+    });
+  });
+</script>

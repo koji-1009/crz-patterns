@@ -1,5 +1,8 @@
 ---
+import FormField from "../../../components/FormField.astro";
+import PrimaryButton from "../../../components/PrimaryButton.astro";
 import PatternLayout from "../../../layouts/PatternLayout.astro";
+const base = import.meta.env.BASE_URL;
 ---
 
 <PatternLayout
@@ -10,44 +13,44 @@ import PatternLayout from "../../../layouts/PatternLayout.astro";
   jsShipped="inline <script> only"
 >
   <p class="text-muted mb-4">Step 1: Basic Info</p>
-  <div class="grid gap-4 max-w-[400px]">
-    <label
-      >Name <input
-        type="text"
-        id="field-name"
-        value="John Doe"
-        class="border border-border rounded-sm p-2 bg-surface w-full mt-1"
-      /></label
-    >
-    <label
-      >Email <input
-        type="email"
-        id="field-email"
-        value="john@example.com"
-        class="border border-border rounded-sm p-2 bg-surface w-full mt-1"
-      /></label
-    >
-    <button
-      type="button"
-      id="next-btn"
-      class="bg-primary text-white border border-primary rounded-sm px-4 py-2 cursor-pointer hover:bg-primary-hover"
-      >Next &rarr;</button
-    >
-  </div>
+  <!-- The form's action is the next step, so "Next" still navigates if the
+       script fails. Inputs carry no `name`, so that fallback GET puts no
+       personal data in the URL. -->
+  <form
+    id="step-form"
+    action={`${base}forms/multi-step/step2`}
+    class="grid gap-4 max-w-[400px]"
+  >
+    <FormField
+      label="Name"
+      type="text"
+      id="field-name"
+      value="John Doe"
+      autocomplete="name"
+    />
+    <FormField
+      label="Email"
+      type="email"
+      id="field-email"
+      value="john@example.com"
+      autocomplete="email"
+    />
+    <PrimaryButton type="submit">Next &rarr;</PrimaryButton>
+  </form>
   <script>
     const KEY = "multi-step";
 
     document.addEventListener("DOMContentLoaded", () => {
+      const form = document.getElementById(
+        "step-form",
+      ) as HTMLFormElement | null;
       const nameEl = document.getElementById(
         "field-name",
       ) as HTMLInputElement | null;
       const emailEl = document.getElementById(
         "field-email",
       ) as HTMLInputElement | null;
-      const btn = document.getElementById(
-        "next-btn",
-      ) as HTMLButtonElement | null;
-      if (!nameEl || !emailEl || !btn) return;
+      if (!form || !nameEl || !emailEl) return;
 
       const saved = sessionStorage.getItem(KEY);
       if (saved) {
@@ -56,11 +59,12 @@ import PatternLayout from "../../../layouts/PatternLayout.astro";
         emailEl.value = d.email ?? emailEl.value;
       }
 
-      btn.addEventListener("click", () => {
+      form.addEventListener("submit", (e) => {
+        e.preventDefault();
         const prev = saved ? JSON.parse(saved) : {};
         const data = { ...prev, name: nameEl.value, email: emailEl.value };
         sessionStorage.setItem(KEY, JSON.stringify(data));
-        window.location.assign(`${import.meta.env.BASE_URL}forms/multi-step/step2`);
+        window.location.assign(form.action);
       });
     });
   </script>

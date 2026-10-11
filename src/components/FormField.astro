@@ -1,0 +1,18 @@
+---
+import type { HTMLAttributes } from "astro/types";
+
+type Props = HTMLAttributes<"input"> & {
+  label: string;
+  hint?: string;
+};
+const { label, hint, ...attrs } = Astro.props;
+---
+
+<label>
+  {label}
+  <input
+    {...attrs}
+    class="border border-border rounded-sm p-2 bg-surface w-full mt-1"
+  />
+  {hint && <span class="text-xs text-muted mt-0.5 block">{hint}</span>}
+</label>

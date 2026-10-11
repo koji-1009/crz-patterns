@@ -18,30 +18,24 @@ const tabs = ["a", "b", "c"];
 <PatternLayout
   title="Tabs"
   assumption="useState + onClick handler"
-  technique="URL path + Astro component"
+  technique="URL path + <nav> + aria-current"
   layer="1"
   jsShipped="0 KB"
 >
-  <div
-    class="flex border-b-2 border-border"
-    role="tablist"
-    aria-label="Demo tabs"
-  >
+  <!-- Each tab is a page, so this is navigation, not an ARIA tablist:
+       links keep link semantics and aria-current marks the active one. -->
+  <nav class="flex border-b-2 border-border" aria-label="Demo tabs">
     {
       tabs.map((t) => (
         <a
           href={`${base}navigation/tabs/${t}`}
-          role="tab"
-          class={
-            t === tab
-              ? "py-2 px-4 no-underline text-primary border-b-2 border-primary -mb-[2px]"
-              : "py-2 px-4 no-underline text-muted -mb-[2px] hover:text-foreground"
-          }
+          aria-current={t === tab ? "page" : undefined}
+          class="py-2 px-4 no-underline text-muted -mb-[2px] hover:not-aria-[current=page]:text-foreground aria-[current=page]:text-primary aria-[current=page]:border-b-2 aria-[current=page]:border-primary"
         >
           Tab {t.toUpperCase()}
         </a>
       ))
     }
-  </div>
+  </nav>
   <TabPanel tab={tab!} />
 </PatternLayout>

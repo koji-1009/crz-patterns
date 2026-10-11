@@ -11,18 +11,22 @@ const { title, assumption, technique, layer, jsShipped } = Astro.props;
 ---
 
 <Layout title={`${title} — CRZ Patterns`}>
-  <header class="mb-8 pb-4 border-b border-border">
-    <h1 class="text-xl font-bold mb-1">{title}</h1>
-    <p class="text-muted italic">SPA assumption: "{assumption}"</p>
-  </header>
-  <main class="mb-8">
-    <slot />
+  <!-- header and footer sit inside <main>, so they are not a second banner
+       and contentinfo next to the site's own -->
+  <main>
+    <header class="mb-8 pb-4 border-b border-border">
+      <h1 class="text-xl font-bold mb-1">{title}</h1>
+      <p class="text-muted italic">SPA assumption: "{assumption}"</p>
+    </header>
+    <div class="mb-8">
+      <slot />
+    </div>
+    <footer class="border-t border-border pt-4 text-muted text-sm">
+      <dl class="grid grid-cols-[auto_1fr] gap-x-4 gap-y-1">
+        <dt class="font-semibold">Technique</dt><dd>{technique}</dd>
+        <dt class="font-semibold">Layer</dt><dd>{layer}</dd>
+        <dt class="font-semibold">JS shipped</dt><dd>{jsShipped}</dd>
+      </dl>
+    </footer>
   </main>
-  <footer class="border-t border-border pt-4 text-muted text-sm">
-    <dl class="grid grid-cols-[auto_1fr] gap-x-4 gap-y-1">
-      <dt class="font-semibold">Technique</dt><dd>{technique}</dd>
-      <dt class="font-semibold">Layer</dt><dd>{layer}</dd>
-      <dt class="font-semibold">JS shipped</dt><dd>{jsShipped}</dd>
-    </dl>
-  </footer>
 </Layout>
