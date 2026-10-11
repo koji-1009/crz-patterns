@@ -1,0 +1,55 @@
+---
+interface Props {
+  id: string;
+}
+const { id } = Astro.props;
+---
+
+<!-- `flex` belongs on the open state only. Declaring display on the closed
+     state would beat the UA rule that gives a closed popover `display: none`,
+     leaving the toast in the layout and accessibility tree — an aria-live
+     region still holding the last message — merely faded to opacity 0. -->
+<div
+  id={id}
+  popover="manual"
+  role="alert"
+  aria-live="assertive"
+  data-toast
+  class="fixed top-2 left-1/2 -translate-x-1/2 -translate-y-4 m-0 border-none items-center gap-2 py-4 px-6 rounded-md font-medium opacity-0 transition-[opacity,translate,display,overlay] duration-300 ease-[ease] transition-discrete open:flex open:opacity-100 open:translate-y-0 starting:open:opacity-0 starting:open:-translate-y-4 data-[type=success]:bg-success data-[type=success]:text-on-success data-[type=error]:bg-danger data-[type=error]:text-on-danger data-[type=info]:bg-primary data-[type=info]:text-on-primary"
+>
+  <span data-toast-icon></span>
+  <span data-toast-msg></span>
+</div>
+
+<script>
+  const config: Record<string, { icon: string; text: string }> = {
+    success: { icon: "✓", text: "Action completed successfully." },
+    error: { icon: "!", text: "Something went wrong." },
+    info: { icon: "ℹ", text: "Notification sent." },
+  };
+
+  // Runs once for every instance; each toast keeps its own timer.
+  document.querySelectorAll<HTMLElement>("[data-toast]").forEach((toast) => {
+    const icon = toast.querySelector("[data-toast-icon]");
+    const msg = toast.querySelector("[data-toast-msg]");
+    if (!icon || !msg) return;
+    let timer: ReturnType<typeof setTimeout>;
+
+    // event.source tells which button fired — no per-button wiring.
+    toast.addEventListener("command", (event) => {
+      const { command, source } = event as Event & {
+        command: string;
+        source: Element | null;
+      };
+      if (command !== "show-popover") return;
+      const type = (source as HTMLElement | null)?.dataset.type;
+      const c = type ? config[type] : undefined;
+      if (!type || !c) return;
+      clearTimeout(timer);
+      toast.dataset.type = type;
+      icon.textContent = c.icon;
+      msg.textContent = c.text;
+      timer = setTimeout(() => toast.hidePopover(), 3000);
+    });
+  });
+</script>

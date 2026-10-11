@@ -1,17 +1,36 @@
 @import "tailwindcss";
 
+/* Theme follows the OS through `color-scheme` with no script. A stored
+   preference pins it by adding `.light` or `.dark` to <html>. */
+@custom-variant dark {
+  &:where(.dark, .dark *) {
+    @slot;
+  }
+  @media (prefers-color-scheme: dark) {
+    &:where(:root:not(.light), :root:not(.light) *) {
+      @slot;
+    }
+  }
+}
+
 @theme {
-  /* Color — semantic (light) */
-  --color-bg: #fafafa;
-  --color-foreground: #1a1a1a;
-  --color-muted: #666666;
-  --color-border: #dddddd;
-  --color-primary: #2563eb;
-  --color-primary-hover: #1d4ed8;
-  --color-surface: #ffffff;
-  --color-surface-alt: #f0f0f0;
-  --color-danger: #dc2626;
-  --color-success: #16a34a;
+  /* Color — semantic, light-dark(light, dark) */
+  --color-bg: light-dark(#fafafa, #111111);
+  --color-foreground: light-dark(#1a1a1a, #e5e5e5);
+  --color-muted: light-dark(#666666, #999999);
+  --color-border: light-dark(#dddddd, #333333);
+  --color-primary: light-dark(#2563eb, #60a5fa);
+  --color-primary-hover: light-dark(#1d4ed8, #93bbfd);
+  --color-surface: light-dark(#ffffff, #1a1a1a);
+  --color-surface-alt: light-dark(#f0f0f0, #222222);
+  --color-danger: light-dark(#dc2626, #f87171);
+  --color-success: light-dark(#16a34a, #4ade80);
+
+  /* Text on a filled primary / danger / success background. The dark-mode
+     fills are light, so white text on them falls below 3:1. */
+  --color-on-primary: light-dark(#ffffff, #111111);
+  --color-on-danger: light-dark(#ffffff, #111111);
+  --color-on-success: light-dark(#ffffff, #111111);
 
   /* Typography */
   --font-sans: system-ui, -apple-system, sans-serif;
@@ -20,20 +39,49 @@
   /* Shape */
   --radius-sm: 4px;
   --radius-md: 8px;
+
+  /* Motion */
+  --animate-pop: pop 0.3s ease;
+  --animate-fade-in-out: fade-in-out 3s ease forwards;
+
+  @keyframes pop {
+    0% {
+      transform: scale(0);
+    }
+    80% {
+      transform: scale(1.1);
+    }
+    100% {
+      transform: scale(1);
+    }
+  }
+
+  @keyframes fade-in-out {
+    0% {
+      opacity: 0;
+    }
+    10% {
+      opacity: 1;
+    }
+    80% {
+      opacity: 1;
+    }
+    100% {
+      opacity: 0;
+    }
+  }
 }
 
-/* Dark mode overrides */
-.dark {
-  --color-bg: #111111;
-  --color-foreground: #e5e5e5;
-  --color-muted: #999999;
-  --color-border: #333333;
-  --color-primary: #60a5fa;
-  --color-primary-hover: #93bbfd;
-  --color-surface: #1a1a1a;
-  --color-surface-alt: #222222;
-  --color-danger: #f87171;
-  --color-success: #4ade80;
+:root {
+  color-scheme: light dark;
+}
+
+:root.light {
+  color-scheme: light;
+}
+
+:root.dark {
+  color-scheme: dark;
 }
 
 /* Native cross-document view transitions.

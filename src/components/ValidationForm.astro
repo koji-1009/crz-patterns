@@ -1,0 +1,69 @@
+---
+import FormField from "./FormField.astro";
+import PrimaryButton from "./PrimaryButton.astro";
+---
+
+<form id="validation-form" class="grid gap-4 max-w-[400px]">
+  <FormField
+    label="Name (required)"
+    hint="Any text, cannot be empty"
+    type="text"
+    name="name"
+    required
+  />
+  <FormField
+    label="Postal Code (###-####)"
+    hint="Format: 123-4567"
+    type="text"
+    name="postal"
+    required
+    pattern="[0-9]{3}-[0-9]{4}"
+    placeholder="123-4567"
+  />
+  <FormField
+    label="Quantity (1-100)"
+    hint="Integer between 1 and 100"
+    type="number"
+    name="qty"
+    required
+    min="1"
+    max="100"
+  />
+  <FormField
+    label="Email"
+    hint="e.g. user@example.com"
+    type="email"
+    name="email"
+    required
+  />
+  <PrimaryButton type="submit">Submit</PrimaryButton>
+</form>
+<div
+  id="validation-success"
+  hidden
+  class="mt-4 p-3 bg-success/10 border border-success rounded-sm text-success max-w-[400px] animate-fade-in-out"
+>
+  All fields valid! In production, this form would submit to the server.
+</div>
+
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    const form = document.getElementById(
+      "validation-form",
+    ) as HTMLFormElement | null;
+    const success = document.getElementById(
+      "validation-success",
+    ) as HTMLElement | null;
+    if (!form || !success) return;
+    form.addEventListener("submit", (e) => {
+      e.preventDefault();
+      // Hiding and re-showing restarts the CSS animation from its first frame
+      success.hidden = true;
+      void success.offsetWidth;
+      success.hidden = false;
+      setTimeout(() => {
+        success.hidden = true;
+      }, 3000);
+    });
+  });
+</script>

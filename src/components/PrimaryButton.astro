@@ -1,0 +1,21 @@
+---
+import type { HTMLAttributes } from "astro/types";
+
+type Props = HTMLAttributes<"button">;
+
+// `type` is pulled out of the spread so it can default to "button": an
+// explicit attribute next to a spread one renders both, and the browser
+// honors whichever comes first.
+const { class: extra, type = "button", ...attrs } = Astro.props;
+---
+
+<button
+  type={type}
+  {...attrs}
+  class:list={[
+    "bg-primary text-on-primary border border-primary rounded-sm px-4 py-2 cursor-pointer hover:bg-primary-hover disabled:opacity-60 disabled:cursor-not-allowed",
+    extra,
+  ]}
+>
+  <slot />
+</button>

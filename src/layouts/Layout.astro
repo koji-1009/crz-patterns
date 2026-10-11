@@ -8,17 +8,20 @@ const { title } = Astro.props;
 const base = import.meta.env.BASE_URL;
 ---
 
-<html lang="en">
+<html lang="en" id="theme-root">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{title}</title>
     <script is:inline>
+      /* With no stored preference the CSS follows prefers-color-scheme on its
+         own; this only pins a theme the user chose before paint. */
       (function () {
-        var s = localStorage.getItem("theme-preference");
-        var d = window.matchMedia("(prefers-color-scheme: dark)").matches;
-        if (s === "dark" || (!s && d))
-          document.documentElement.classList.add("dark");
+        try {
+          var s = localStorage.getItem("theme-preference");
+          if (s === "dark" || s === "light")
+            document.documentElement.classList.add(s);
+        } catch (e) {}
       })();
     </script>
   </head>
@@ -32,9 +35,15 @@ const base = import.meta.env.BASE_URL;
         >CRZ Patterns</a
       >
       <button
-        id="theme-btn"
+        type="button"
+        command="--toggle-theme"
+        commandfor="theme-root"
         class="text-sm text-muted border border-border rounded-sm px-3 py-1 cursor-pointer hover:bg-surface-alt"
-        aria-label="Toggle dark mode"></button>
+        aria-label="Toggle dark mode"
+        ><span class="dark:hidden">Dark</span><span class="hidden dark:inline"
+          >Light</span
+        ></button
+      >
     </header>
     <div class="px-4">
       <slot />
@@ -88,21 +97,24 @@ const base = import.meta.env.BASE_URL;
       })();
     </script>
     <script is:inline>
-      document.addEventListener("DOMContentLoaded", function () {
-        var btn = document.getElementById("theme-btn");
-        if (!btn) return;
-        function update() {
-          btn.textContent = document.documentElement.classList.contains("dark")
-            ? "Light"
-            : "Dark";
-        }
-        update();
-        btn.onclick = function () {
-          var dark = document.documentElement.classList.toggle("dark");
-          localStorage.setItem("theme-preference", dark ? "dark" : "light");
-          update();
-        };
-      });
+      /* The button's label is CSS (the `dark:` variant); this listener on the
+         command target only flips the pinned theme and stores it. */
+      (function () {
+        var root = document.documentElement;
+        root.addEventListener("command", function (e) {
+          if (e.command !== "--toggle-theme") return;
+          var dark =
+            root.classList.contains("dark") ||
+            (!root.classList.contains("light") &&
+              window.matchMedia("(prefers-color-scheme: dark)").matches);
+          var next = dark ? "light" : "dark";
+          root.classList.remove("light", "dark");
+          root.classList.add(next);
+          try {
+            localStorage.setItem("theme-preference", next);
+          } catch (err) {}
+        });
+      })();
     </script>
   </body>
 </html>

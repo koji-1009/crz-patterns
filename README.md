@@ -17,7 +17,7 @@ Every pattern in this catalog has a stated "SPA assumption" — the library or f
 | Draft Persistence | useState + Context                   | sessionStorage                       |
 | Input Validation  | Formik / react-hook-form             | HTML5 validation attributes          |
 | Multi-step Form   | useState + Router                    | sessionStorage + URL path            |
-| Tabs              | useState + onClick                   | URL path + Astro component           |
+| Tabs              | useState + onClick                   | URL path + `<nav>` + `aria-current`  |
 | Accordion         | useState + toggle                    | `<details>` + `interpolate-size`     |
 | Dialog            | createPortal + useState + focus trap | `<dialog>` + `command`/`commandfor` + `closedby` |
 | Tooltip           | Tippy.js / Floating UI               | CSS `:hover` + `::after`             |
@@ -25,7 +25,7 @@ Every pattern in this catalog has a stated "SPA assumption" — the library or f
 | Carousel          | Swiper.js                            | CSS `scroll-snap-type`               |
 | Lightbox          | react-lightbox                       | `<dialog>` + `command`/`commandfor`  |
 | Hamburger Menu    | useState + toggle + click-outside    | `<details>` + container query        |
-| Dark Mode         | ThemeProvider + Context              | CSS custom properties + localStorage |
+| Dark Mode         | ThemeProvider + Context              | CSS `light-dark()` + `color-scheme` + custom command (`--toggle-theme`) + localStorage |
 | Loading Overlay   | isLoading useState + Suspense        | `<dialog>` + `closedby` + URL state  |
 | Drag & Drop       | dnd-kit / react-beautiful-dnd        | HTML5 Drag and Drop API              |
 | Clipboard         | useState + useRef                    | Custom command (`--copy`) + `navigator.clipboard` |
@@ -41,12 +41,13 @@ Every pattern in this catalog has a stated "SPA assumption" — the library or f
 * **Popover API / `<dialog>`** — Top layer for overlays, no `z-index` hacks
 * **Declarative invocation** — `command` / `commandfor` bind a button to its dialog or popover in markup. The binding exists as soon as the element is parsed, so no click is lost waiting for a listener. `closedby="any"` gives light dismiss and `closedby="none"` refuses Esc, both without a `cancel` handler. Where a script still runs, it listens on the target and reads `event.source` — the browser owns the invocation, the script only owns what happens next
 * **CSS animations at Layer 2** — `@starting-style`, `interpolate-size`, `::details-content`
-* **Native view transitions** — CSS `@view-transition { navigation: auto }` for cross-document page transitions, no client-side router. An inline `<head>` script applies the dark-mode class on every page load, so preference survives navigation with no swap hook
+* **Native view transitions** — CSS `@view-transition { navigation: auto }` for cross-document page transitions, no client-side router. An inline `<head>` script pins a stored theme (`.light` / `.dark`) on every page load, so preference survives navigation with no swap hook
+* **Theme is CSS-first** — every color token is a `light-dark()` pair resolved by `color-scheme`, so the OS preference applies with JavaScript off. Filled surfaces pair with `on-*` text tokens (`text-on-primary`) for contrast in both themes
 
 ## Tech Stack
 
 * [Astro](https://astro.build/) 7 — Static output for GitHub Pages
-* [Tailwind CSS](https://tailwindcss.com/) 4 — `@theme` tokens, no `@apply`
+* [Tailwind CSS](https://tailwindcss.com/) 4 — the only styling method: `@theme` tokens, no `@apply`, no scoped `<style>`
 * No runtime dependencies beyond Astro and Tailwind
 
 ## Development

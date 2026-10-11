@@ -1,0 +1,13 @@
+---
+interface Props {
+  text: string;
+}
+const { text } = Astro.props;
+---
+
+<span
+  data-tooltip={text}
+  class="relative underline decoration-dotted cursor-help after:content-[attr(data-tooltip)] after:absolute after:bottom-full after:left-1/2 after:-translate-x-1/2 after:mb-1 after:py-2 after:px-3 after:bg-foreground after:text-bg after:rounded-sm after:text-[0.8rem] after:whitespace-pre after:pointer-events-none after:opacity-0 after:transition-opacity after:duration-200 hover:after:opacity-100"
+>
+  <slot />
+</span>

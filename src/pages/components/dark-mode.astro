@@ -5,7 +5,7 @@ import PatternLayout from "../../layouts/PatternLayout.astro";
 <PatternLayout
   title="Dark Mode"
   assumption="ThemeProvider + Context + useState"
-  technique="CSS custom properties + localStorage + inline <script>"
+  technique="CSS light-dark() + color-scheme + custom command (--toggle-theme) + localStorage"
   layer="1-2"
   jsShipped="inline <script> only"
 >
@@ -17,18 +17,23 @@ import PatternLayout from "../../layouts/PatternLayout.astro";
   <h3 class="mb-4">How It Works</h3>
   <ol class="pl-6 list-decimal mb-6 space-y-1">
     <li>
+      Every color token in <code>@theme</code> is a <code>light-dark()</code> pair,
+      resolved by <code>color-scheme</code> on <code>&lt;html&gt;</code>
+    </li>
+    <li>
+      With nothing stored, <code>color-scheme: light dark</code> follows <code
+        >prefers-color-scheme</code
+      > — no script involved, so it works with JavaScript off
+    </li>
+    <li>
       Inline <code>&lt;script&gt;</code> in <code>&lt;head&gt;</code> reads <code
         >localStorage</code
-      > before paint — no flash
-    </li>
-    <li>Click toggles <code>.dark</code> class on <code>&lt;html&gt;</code></li>
-    <li>
-      CSS custom properties in <code>@theme</code> / <code>.dark</code> handle all
-      colors
+      > before paint and pins <code>.light</code> or <code>.dark</code> — no flash
     </li>
     <li>
-      Respects <code>prefers-color-scheme</code> as default when no preference is
-      stored
+      The button sends a <code>--toggle-theme</code> command to <code
+        >&lt;html&gt;</code
+      >; its label switches through the <code>dark:</code> variant, not script
     </li>
   </ol>
 
@@ -40,17 +45,17 @@ import PatternLayout from "../../layouts/PatternLayout.astro";
     <div class="p-4 bg-surface-alt rounded-md">
       <strong>Surface Alt</strong> — bg-surface-alt
     </div>
-    <div class="p-4 bg-primary text-white rounded-md">
-      <strong>Primary</strong> — bg-primary
+    <div class="p-4 bg-primary text-on-primary rounded-md">
+      <strong>Primary</strong> — bg-primary + text-on-primary
     </div>
-    <div class="p-4 bg-danger text-white rounded-md">
-      <strong>Danger</strong> — bg-danger
+    <div class="p-4 bg-danger text-on-danger rounded-md">
+      <strong>Danger</strong> — bg-danger + text-on-danger
     </div>
-    <div class="p-4 bg-success text-white rounded-md">
-      <strong>Success</strong> — bg-success
+    <div class="p-4 bg-success text-on-success rounded-md">
+      <strong>Success</strong> — bg-success + text-on-success
     </div>
     <p class="text-muted text-sm">
-      All these colors switch automatically based on the <code>.dark</code> class.
+      All these colors switch automatically through <code>color-scheme</code>.
       No per-component logic needed.
     </p>
   </div>

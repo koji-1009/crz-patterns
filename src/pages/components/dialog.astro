@@ -1,4 +1,6 @@
 ---
+import DemoDialog from "../../components/DemoDialog.astro";
+import PrimaryButton from "../../components/PrimaryButton.astro";
 import PatternLayout from "../../layouts/PatternLayout.astro";
 ---
 
@@ -10,49 +12,27 @@ import PatternLayout from "../../layouts/PatternLayout.astro";
   jsShipped="0 KB"
 >
   <div class="flex gap-3 flex-wrap">
-    <button
-      type="button"
-      command="show-modal"
-      commandfor="dialog-dismissible"
-      class="bg-primary text-white border border-primary rounded-sm px-4 py-2 cursor-pointer hover:bg-primary-hover"
-      >Dismissible Dialog</button
+    <PrimaryButton command="show-modal" commandfor="dialog-dismissible"
+      >Dismissible Dialog</PrimaryButton
     >
-    <button
-      type="button"
-      command="show-modal"
-      commandfor="dialog-persistent"
-      class="bg-primary text-white border border-primary rounded-sm px-4 py-2 cursor-pointer hover:bg-primary-hover"
-      >Persistent Dialog</button
+    <PrimaryButton command="show-modal" commandfor="dialog-persistent"
+      >Persistent Dialog</PrimaryButton
     >
   </div>
 
   <!-- Dismissible: closedby="any" gives backdrop click + Esc, no listener -->
-  <dialog
-    id="dialog-dismissible"
-    closedby="any"
-    class="border border-border rounded-md p-6 w-[calc(100%-2rem)] max-w-[400px] bg-surface text-foreground"
-  >
-    <h2 class="mb-4">Dismissible Dialog</h2>
+  <DemoDialog id="dialog-dismissible" title="Dismissible Dialog" closedby="any">
     <p class="mb-4">
       Backdrop click closes. Esc closes. This is the default behavior for
       informational dialogs.
     </p>
-    <button
-      type="button"
-      command="close"
-      commandfor="dialog-dismissible"
-      class="bg-primary text-white border border-primary rounded-sm px-4 py-2 cursor-pointer hover:bg-primary-hover"
-      >Close</button
+    <PrimaryButton command="close" commandfor="dialog-dismissible"
+      >Close</PrimaryButton
     >
-  </dialog>
+  </DemoDialog>
 
   <!-- Persistent: closedby="none" refuses every close request -->
-  <dialog
-    id="dialog-persistent"
-    closedby="none"
-    class="border border-border rounded-md p-6 w-[calc(100%-2rem)] max-w-[400px] bg-surface text-foreground"
-  >
-    <h2 class="mb-4">Persistent Dialog</h2>
+  <DemoDialog id="dialog-persistent" title="Persistent Dialog" closedby="none">
     <p class="mb-4">
       Backdrop click does <strong>not</strong> close. Esc does <strong
         >not</strong
@@ -68,53 +48,9 @@ import PatternLayout from "../../layouts/PatternLayout.astro";
         class="border border-border rounded-sm px-4 py-2 cursor-pointer hover:bg-surface-alt"
         >Cancel</button
       >
-      <button
-        type="button"
-        command="close"
-        commandfor="dialog-persistent"
-        value="confirm"
-        class="bg-primary text-white border border-primary rounded-sm px-4 py-2 cursor-pointer hover:bg-primary-hover"
-        >Confirm</button
+      <PrimaryButton command="close" commandfor="dialog-persistent" value="confirm"
+        >Confirm</PrimaryButton
       >
     </div>
-  </dialog>
-
-  <style>
-    dialog {
-      margin: auto;
-      opacity: 0;
-      transform: scale(0.95);
-      transition:
-        opacity 0.2s ease,
-        transform 0.2s ease,
-        display 0.2s ease allow-discrete,
-        overlay 0.2s ease allow-discrete;
-    }
-    dialog[open] {
-      opacity: 1;
-      transform: scale(1);
-    }
-    @starting-style {
-      dialog[open] {
-        opacity: 0;
-        transform: scale(0.95);
-      }
-    }
-
-    dialog::backdrop {
-      background: rgba(0, 0, 0, 0);
-      transition:
-        background 0.2s ease,
-        display 0.2s ease allow-discrete,
-        overlay 0.2s ease allow-discrete;
-    }
-    dialog[open]::backdrop {
-      background: rgba(0, 0, 0, 0.5);
-    }
-    @starting-style {
-      dialog[open]::backdrop {
-        background: rgba(0, 0, 0, 0);
-      }
-    }
-  </style>
+  </DemoDialog>
 </PatternLayout>
