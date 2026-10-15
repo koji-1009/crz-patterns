@@ -9,16 +9,29 @@ const { id } = Astro.props;
      state would beat the UA rule that gives a closed popover `display: none`,
      leaving the toast in the layout and accessibility tree — an aria-live
      region still holding the last message — merely faded to opacity 0. -->
+<!-- The trigger buttons open this before the script loads, or when it fails
+     to, so the markup carries a complete toast on its own: a default message
+     and a declarative close control. The script only swaps the message and
+     adds the auto-hide timer. -->
 <div
   id={id}
   popover="manual"
   role="alert"
   aria-live="assertive"
   data-toast
+  data-type="info"
   class="fixed top-2 left-1/2 -translate-x-1/2 -translate-y-4 m-0 border-none items-center gap-2 py-4 px-6 rounded-md font-medium opacity-0 transition-[opacity,translate,display,overlay] duration-300 transition-discrete open:flex open:opacity-100 open:translate-y-0 starting:open:opacity-0 starting:open:-translate-y-4 data-[type=success]:bg-success data-[type=success]:text-on-success data-[type=error]:bg-danger data-[type=error]:text-on-danger data-[type=info]:bg-primary data-[type=info]:text-on-primary"
 >
-  <span data-toast-icon></span>
-  <span data-toast-msg></span>
+  <span data-toast-icon>ℹ</span>
+  <span data-toast-msg>Notification sent.</span>
+  <button
+    type="button"
+    popovertarget={id}
+    popovertargetaction="hide"
+    aria-label="Close notification"
+    class="ml-2 border-none bg-transparent text-inherit text-lg leading-none cursor-pointer"
+    >&times;</button
+  >
 </div>
 
 <script>

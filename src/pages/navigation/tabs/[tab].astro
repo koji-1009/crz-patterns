@@ -1,4 +1,5 @@
 ---
+import TabNav from "../../../components/TabNav.astro";
 import TabPanel from "../../../components/TabPanel.astro";
 import PatternLayout from "../../../layouts/PatternLayout.astro";
 
@@ -11,7 +12,6 @@ export function getStaticPaths() {
 }
 
 const { tab } = Astro.params;
-const base = import.meta.env.BASE_URL;
 const tabs = ["a", "b", "c"];
 ---
 
@@ -22,20 +22,6 @@ const tabs = ["a", "b", "c"];
   layer="1"
   jsShipped="0 KB"
 >
-  <!-- Each tab is a page, so this is navigation, not an ARIA tablist:
-       links keep link semantics and aria-current marks the active one. -->
-  <nav class="flex border-b-2 border-border" aria-label="Demo tabs">
-    {
-      tabs.map((t) => (
-        <a
-          href={`${base}navigation/tabs/${t}`}
-          aria-current={t === tab ? "page" : undefined}
-          class="py-2 px-4 no-underline text-muted -mb-0.5 hover:not-aria-[current=page]:text-foreground aria-[current=page]:text-primary aria-[current=page]:border-b-2 aria-[current=page]:border-primary"
-        >
-          Tab {t.toUpperCase()}
-        </a>
-      ))
-    }
-  </nav>
+  <TabNav tabs={tabs} current={tab!} />
   <TabPanel tab={tab!} />
 </PatternLayout>

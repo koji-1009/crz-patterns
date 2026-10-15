@@ -32,6 +32,37 @@ test.describe("toast", () => {
     await expect(page.locator("#toast")).toBeVisible();
     await expect(page.locator("#toast")).toBeHidden({ timeout: 8_000 });
   });
+
+  test("the toast closes from its own close button", async ({ page }) => {
+    await page.getByRole("button", { name: "Error" }).click();
+    await expect(page.locator("#toast")).toBeVisible();
+    await page.getByRole("button", { name: "Close notification" }).click();
+    await expect(page.locator("#toast")).toBeHidden();
+  });
+});
+
+// The triggers are declarative, so they work before any script runs. The
+// overlays they open must then still be complete and closable on their own.
+test.describe("without the script", () => {
+  test.use({ javaScriptEnabled: false });
+
+  test("the toast opens with a message and closes again", async ({ page }) => {
+    await page.goto("components/toast");
+    await page.getByRole("button", { name: "Error" }).click();
+    const toast = page.locator("#toast");
+    await expect(toast).toBeVisible();
+    await expect(toast.locator("[data-toast-msg]")).not.toBeEmpty();
+    await page.getByRole("button", { name: "Close notification" }).click();
+    await expect(toast).toBeHidden();
+  });
+
+  test("the loading overlay can be left", async ({ page }) => {
+    await page.goto("components/loading-overlay");
+    await page.getByRole("button", { name: "Execute Action" }).click();
+    await expect(page.locator("#overlay")).toBeVisible();
+    await page.getByRole("button", { name: "Cancel" }).click();
+    await expect(page.locator("#overlay")).toBeHidden();
+  });
 });
 
 test.describe("loading overlay", () => {
@@ -49,8 +80,9 @@ test.describe("loading overlay", () => {
 
     const overlay = page.locator("#overlay");
     await expect(overlay).toBeVisible();
-    await expect(page.locator("#ol-loading")).toBeVisible();
-    await expect(page.locator("#ol-success")).toBeVisible();
+    await expect(page.locator("#overlay-cancel")).toBeHidden();
+    await expect(page.locator("#overlay-loading")).toBeVisible();
+    await expect(page.locator("#overlay-success")).toBeVisible();
   });
 
   test("the overlay refuses Escape while it is up", async ({ page }) => {
@@ -79,7 +111,7 @@ test.describe("loading overlay", () => {
   test("the error path reaches its own dismiss control", async ({ page }) => {
     await page.selectOption("#cfg-result", "error");
     await page.getByRole("button", { name: "Execute Action" }).click();
-    await expect(page.locator("#ol-error")).toBeVisible();
+    await expect(page.locator("#overlay-error")).toBeVisible();
     await page.getByRole("button", { name: "Dismiss" }).click();
     await expect(page.locator("#overlay")).toBeHidden();
   });

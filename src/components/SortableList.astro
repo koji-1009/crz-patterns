@@ -5,7 +5,7 @@ interface Props {
 const { items } = Astro.props;
 ---
 
-<ul id="sortable" class="list-none p-0 max-w-[400px] grid gap-2">
+<ul data-sortable class="list-none p-0 max-w-[400px] grid gap-2">
   {
     items.map((label, i) => (
       <li
@@ -20,42 +20,41 @@ const { items } = Astro.props;
 </ul>
 
 <script>
-  document.addEventListener("DOMContentLoaded", () => {
-    let dragged: HTMLElement | null = null;
-    const list = document.getElementById(
-      "sortable",
-    ) as HTMLUListElement | null;
-    if (!list) return;
+  // Runs once for every instance; each list reorders only its own items.
+  document
+    .querySelectorAll<HTMLUListElement>("ul[data-sortable]")
+    .forEach((list) => {
+      let dragged: HTMLElement | null = null;
 
-    function updatePositions() {
-      list!.querySelectorAll(".pos").forEach((el, i) => {
-        el.textContent = `${i + 1}.`;
-      });
-    }
-
-    list.addEventListener("dragstart", (e) => {
-      dragged = e.target as HTMLElement;
-      dragged.dataset.dragging = "";
-    });
-
-    list.addEventListener("dragend", (e) => {
-      delete (e.target as HTMLElement).dataset.dragging;
-      dragged = null;
-      updatePositions();
-    });
-
-    list.addEventListener("dragover", (e) => {
-      e.preventDefault();
-      const target = (e.target as HTMLElement).closest("li");
-      if (target && dragged && target !== dragged) {
-        const rect = target.getBoundingClientRect();
-        const mid = rect.top + rect.height / 2;
-        if (e.clientY < mid) {
-          list.insertBefore(dragged, target);
-        } else {
-          list.insertBefore(dragged, target.nextSibling);
-        }
+      function updatePositions() {
+        list.querySelectorAll(".pos").forEach((el, i) => {
+          el.textContent = `${i + 1}.`;
+        });
       }
+
+      list.addEventListener("dragstart", (e) => {
+        dragged = e.target as HTMLElement;
+        dragged.dataset.dragging = "";
+      });
+
+      list.addEventListener("dragend", (e) => {
+        delete (e.target as HTMLElement).dataset.dragging;
+        dragged = null;
+        updatePositions();
+      });
+
+      list.addEventListener("dragover", (e) => {
+        e.preventDefault();
+        const target = (e.target as HTMLElement).closest("li");
+        if (target && dragged && target !== dragged) {
+          const rect = target.getBoundingClientRect();
+          const mid = rect.top + rect.height / 2;
+          if (e.clientY < mid) {
+            list.insertBefore(dragged, target);
+          } else {
+            list.insertBefore(dragged, target.nextSibling);
+          }
+        }
+      });
     });
-  });
 </script>

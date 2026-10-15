@@ -18,6 +18,14 @@ const base = import.meta.env.BASE_URL;
     class="grid gap-2 p-4 bg-surface-alt rounded-sm max-w-[400px] mb-4"
   >
   </div>
+  <!-- Live region for the submit outcome. It also takes focus, since the
+       button that had it is removed. -->
+  <p
+    id="submit-result"
+    role="status"
+    tabindex="-1"
+    class="p-4 bg-surface-alt rounded-sm max-w-[400px] mb-4 empty:hidden"
+  ></p>
   <div class="flex gap-4">
     <SecondaryLink href={`${base}forms/multi-step/step2`}
       >&larr; Back</SecondaryLink
@@ -34,7 +42,8 @@ const base = import.meta.env.BASE_URL;
       const btn = document.getElementById(
         "submit-btn",
       ) as HTMLButtonElement | null;
-      if (!container || !btn) return;
+      const result = document.getElementById("submit-result");
+      if (!container || !btn || !result) return;
 
       const saved = sessionStorage.getItem(KEY);
       if (!saved) {
@@ -62,11 +71,10 @@ const base = import.meta.env.BASE_URL;
 
       btn.addEventListener("click", () => {
         sessionStorage.removeItem(KEY);
-        container.textContent = "";
-        const p = document.createElement("p");
-        p.textContent = "Submitted! All data cleared from sessionStorage.";
-        container.appendChild(p);
+        container.remove();
+        result.textContent = "Submitted! All data cleared from sessionStorage.";
         btn.remove();
+        result.focus();
       });
     });
   </script>

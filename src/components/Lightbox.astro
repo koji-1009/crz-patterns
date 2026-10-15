@@ -1,25 +1,26 @@
 ---
 interface Props {
+  id: string;
   count: number;
 }
-const { count } = Astro.props;
+const { id, count } = Astro.props;
 const images = Array.from({ length: count }, (_, i) => i + 1);
 ---
 
 <div class="grid grid-cols-3 gap-2 max-w-[500px]">
   {
-    images.map((id) => (
+    images.map((n) => (
       <button
         type="button"
         command="show-modal"
-        commandfor="lightbox"
+        commandfor={id}
         class="p-0 border-none cursor-pointer bg-transparent [-webkit-tap-highlight-color:transparent]"
-        data-id={id}
-        aria-label={`Open image ${id}`}
+        data-id={n}
+        aria-label={`Open image ${n}`}
       >
         <img
-          src={`https://picsum.photos/seed/${id}/200/200`}
-          alt={`Thumbnail ${id}`}
+          src={`https://picsum.photos/seed/${n}/200/200`}
+          alt={`Thumbnail ${n}`}
           width="200"
           height="200"
           loading="lazy"
@@ -31,12 +32,13 @@ const images = Array.from({ length: count }, (_, i) => i + 1);
 </div>
 
 <dialog
-  id="lightbox"
+  id={id}
   closedby="any"
+  data-lightbox
   class="relative m-auto border-none bg-transparent p-0 max-w-[90vw] max-h-[90vh] outline-none backdrop:bg-black/85"
 >
   <img
-    id="lightbox-img"
+    id={`${id}-img`}
     src=""
     alt=""
     class="rounded-md max-w-[80vw] max-h-[80vh] object-contain opacity-0 transition-opacity duration-300 data-loaded:opacity-100"
@@ -46,7 +48,7 @@ const images = Array.from({ length: count }, (_, i) => i + 1);
   <button
     type="button"
     command="close"
-    commandfor="lightbox"
+    commandfor={id}
     aria-label="Close image"
     class="absolute top-2 right-2 w-9 h-9 rounded-full border-none bg-black/60 text-white text-xl leading-none cursor-pointer hover:bg-black/80"
     >&times;</button
@@ -54,30 +56,28 @@ const images = Array.from({ length: count }, (_, i) => i + 1);
 </dialog>
 
 <script>
-  document.addEventListener("DOMContentLoaded", () => {
-    const dialog = document.getElementById(
-      "lightbox",
-    ) as HTMLDialogElement | null;
-    const img = document.getElementById(
-      "lightbox-img",
-    ) as HTMLImageElement | null;
-    if (!dialog || !img) return;
+  // Runs once for every instance; each dialog swaps its own image.
+  document
+    .querySelectorAll<HTMLDialogElement>("dialog[data-lightbox]")
+    .forEach((dialog) => {
+      const img = dialog.querySelector("img");
+      if (!img) return;
 
-    // The browser owns the invocation; the listener only swaps the source.
-    dialog.addEventListener("command", (event) => {
-      const { command, source } = event as Event & {
-        command: string;
-        source: Element | null;
-      };
-      if (command !== "show-modal") return;
-      const id = (source as HTMLElement | null)?.dataset.id;
-      delete img.dataset.loaded;
-      img.src = `https://picsum.photos/seed/${id}/800/600`;
-      img.alt = `Image ${id}`;
-    });
+      // The browser owns the invocation; the listener only swaps the source.
+      dialog.addEventListener("command", (event) => {
+        const { command, source } = event as Event & {
+          command: string;
+          source: Element | null;
+        };
+        if (command !== "show-modal") return;
+        const id = (source as HTMLElement | null)?.dataset.id;
+        delete img.dataset.loaded;
+        img.src = `https://picsum.photos/seed/${id}/800/600`;
+        img.alt = `Image ${id}`;
+      });
 
-    img.addEventListener("load", () => {
-      img.dataset.loaded = "";
+      img.addEventListener("load", () => {
+        img.dataset.loaded = "";
+      });
     });
-  });
 </script>

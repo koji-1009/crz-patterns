@@ -1,0 +1,27 @@
+<div class="text-sm mb-6 p-3 border border-border rounded-sm bg-surface-alt">
+  <p class="font-semibold mb-2">Limitations of HTML5 Drag and Drop API</p>
+  <ul class="pl-5 list-disc space-y-1 text-muted">
+    <li>
+      <strong>No touch support</strong> — does not work on mobile/tablet. Touch
+      requires a library (dnd-kit, etc.)
+    </li>
+    <li>
+      <strong>Limited drag preview control</strong> — customizing the dragged element's
+      appearance is restricted
+    </li>
+    <li>
+      <strong>Drop target highlighting</strong> — managing dragenter/dragleave state
+      is verbose and error-prone
+    </li>
+    <li>
+      <strong>No keyboard accessibility</strong> — the API does not include keyboard-based
+      drag and drop
+    </li>
+  </ul>
+  <p class="mt-2 text-muted">
+    This demo shows that basic desktop reorder works without a framework or
+    library. When production requires rich DnD (touch, accessibility, custom
+    previews), adopting a library is a justified decision under CRZ
+    principles.
+  </p>
+</div>

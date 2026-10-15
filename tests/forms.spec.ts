@@ -18,8 +18,8 @@ test.describe("draft persistence", () => {
   });
 
   test("submitting lands on a real page, not a 404", async ({ page }) => {
-    await page.fill('input[name="name"]', "Ada");
-    await page.fill('input[name="email"]', "ada@example.com");
+    await page.fill("#draft-name", "Ada");
+    await page.fill("#draft-email", "ada@example.com");
 
     const [response] = await Promise.all([
       page.waitForNavigation(),
@@ -31,21 +31,31 @@ test.describe("draft persistence", () => {
     await expect(page).toHaveURL(/\/crz-patterns\/forms\/draft/);
   });
 
+  test("submitting puts none of the input in the URL", async ({ page }) => {
+    await page.fill("#draft-name", "Ada");
+    await page.fill("#draft-email", "ada@example.com");
+    await page.getByRole("button", { name: "Submit" }).click();
+    // An empty GET submission still leaves the "?" behind
+    await page.waitForURL(/\/crz-patterns\/forms\/draft\?/);
+
+    expect(new URL(page.url()).search).toBe("");
+  });
+
   test("a draft survives navigating away and back", async ({ page }) => {
-    await page.fill('input[name="name"]', "Grace");
-    await page.fill('textarea[name="message"]', "half-written");
+    await page.fill("#draft-name", "Grace");
+    await page.fill("#draft-message", "half-written");
 
     await page.getByRole("link", { name: /Navigate away/ }).click();
     await page.goBack();
 
-    await expect(page.locator('input[name="name"]')).toHaveValue("Grace");
-    await expect(page.locator('textarea[name="message"]')).toHaveValue(
+    await expect(page.locator("#draft-name")).toHaveValue("Grace");
+    await expect(page.locator("#draft-message")).toHaveValue(
       "half-written",
     );
   });
 
   test("submitting clears the stored draft", async ({ page }) => {
-    await page.fill('input[name="name"]', "Alan");
+    await page.fill("#draft-name", "Alan");
     await page.getByRole("button", { name: "Submit" }).click();
     await page.waitForURL(/\/crz-patterns\/forms\/draft/);
 
@@ -53,6 +63,35 @@ test.describe("draft persistence", () => {
       sessionStorage.getItem("draft-form-data"),
     );
     expect(stored).toBeNull();
+  });
+});
+
+test.describe("multi-step form", () => {
+  test("submitting announces the result and moves focus to it", async ({
+    page,
+  }) => {
+    await page.goto("forms/multi-step/step1");
+    await page.getByRole("button", { name: /Next/ }).click();
+    await page.waitForURL(/step2/);
+    await page.getByRole("button", { name: /Next/ }).click();
+    await page.waitForURL(/step3/);
+
+    await page.getByRole("button", { name: "Confirm & Submit" }).click();
+    const result = page.getByRole("status");
+    await expect(result).toHaveText(/Submitted!/);
+    await expect(result).toBeFocused();
+  });
+});
+
+test.describe("input validation", () => {
+  test("the success message sits in a live region", async ({ page }) => {
+    await page.goto("forms/validation");
+    await page.fill('input[name="name"]', "Ada");
+    await page.fill('input[name="postal"]', "123-4567");
+    await page.fill('input[name="qty"]', "5");
+    await page.fill('input[name="email"]', "ada@example.com");
+    await page.getByRole("button", { name: "Submit" }).click();
+    await expect(page.getByRole("status")).toContainText("All fields valid!");
   });
 });
 
