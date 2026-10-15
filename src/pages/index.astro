@@ -1,7 +1,6 @@
 ---
-import PatternLink from "../components/PatternLink.astro";
+import CatalogSection from "../components/CatalogSection.astro";
 import Layout from "../layouts/Layout.astro";
-const base = import.meta.env.BASE_URL;
 
 const SCRIPT = "inline <script> only";
 
@@ -56,14 +55,7 @@ const sections = [
     <h1 class="text-xl font-bold">Pattern Catalog</h1>
     {
       sections.map((section) => (
-        <section>
-          <h2 class="mt-8 mb-3 text-sm text-muted uppercase tracking-wide font-bold">
-            {section.title}
-          </h2>
-          {section.patterns.map((p) => (
-            <PatternLink href={`${base}${p.path}`} name={p.name} meta={p.meta} />
-          ))}
-        </section>
+        <CatalogSection title={section.title} patterns={section.patterns} />
       ))
     }
   </main>

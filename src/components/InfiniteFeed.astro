@@ -8,165 +8,171 @@ const base = import.meta.env.BASE_URL;
 ---
 
 <div
-  id="feed-box"
-  class="h-[28rem] overflow-y-auto border border-border rounded-md bg-surface"
+  data-infinite-feed
+  data-endpoint={`${base}extra/infinite-scroll/feed/`}
+  data-next-page="2"
+  data-total-pages={TOTAL_PAGES}
+  data-page-size={PAGE_SIZE}
 >
-  <ul id="feed">
-    {firstChunk.map((item) => <FeedItem item={item} />)}
-  </ul>
   <div
-    id="sentinel"
-    class="h-14 flex items-center justify-center text-sm text-muted"
-    data-endpoint={`${base}extra/infinite-scroll/feed/`}
-    data-next-page="2"
-    data-total-pages={TOTAL_PAGES}
-    data-page-size={PAGE_SIZE}
+    data-feed-box
+    class="h-[28rem] overflow-y-auto border border-border rounded-md bg-surface"
   >
+    <ul data-feed>
+      {firstChunk.map((item) => <FeedItem item={item} />)}
+    </ul>
+    <div
+      data-sentinel
+      class="h-14 flex items-center justify-center text-sm text-muted"
+    >
+    </div>
   </div>
+  <template data-item-template>
+    <FeedItem />
+  </template>
+  <!-- Retry control rendered at build time, so it shares PrimaryButton's
+       styling instead of repeating its classes in script -->
+  <template data-retry-template>
+    <PrimaryButton>Load failed — Retry</PrimaryButton>
+  </template>
+  <noscript>
+    <p class="py-4 text-center text-sm text-muted">
+      JavaScript is disabled — only the first {PAGE_SIZE} items are available.
+    </p>
+  </noscript>
 </div>
-<template id="item-template">
-  <FeedItem />
-</template>
-<!-- Retry control rendered at build time, so it shares PrimaryButton's
-     styling instead of repeating its classes in script -->
-<template id="retry-template">
-  <PrimaryButton>Load failed — Retry</PrimaryButton>
-</template>
-<noscript>
-  <p class="py-4 text-center text-sm text-muted">
-    JavaScript is disabled — only the first {PAGE_SIZE} items are available.
-  </p>
-</noscript>
 
 <script>
-  let observer: IntersectionObserver | null = null;
+  // Runs once for every instance; each feed keeps its own observer and
+  // paging state.
+  document
+    .querySelectorAll<HTMLElement>("[data-infinite-feed]")
+    .forEach((root) => {
+      const boxEl = root.querySelector<HTMLElement>("[data-feed-box]");
+      const feedEl = root.querySelector<HTMLUListElement>("[data-feed]");
+      const sentinelEl = root.querySelector<HTMLElement>("[data-sentinel]");
+      const templateEl = root.querySelector<HTMLTemplateElement>(
+        "[data-item-template]",
+      );
+      const retryTemplateEl = root.querySelector<HTMLTemplateElement>(
+        "[data-retry-template]",
+      );
+      if (!boxEl || !feedEl || !sentinelEl || !templateEl || !retryTemplateEl)
+        return;
+      // Narrowed bindings: hoisted inner functions don't inherit the guard above
+      const box = boxEl;
+      const feed = feedEl;
+      const sentinel = sentinelEl;
+      const template = templateEl;
+      const retryTemplate = retryTemplateEl;
 
-  document.addEventListener("DOMContentLoaded", () => {
-    observer?.disconnect();
-    const boxEl = document.getElementById("feed-box");
-    const feedEl = document.getElementById("feed");
-    const sentinelEl = document.getElementById("sentinel");
-    const templateEl = document.getElementById(
-      "item-template",
-    ) as HTMLTemplateElement | null;
-    const retryTemplateEl = document.getElementById(
-      "retry-template",
-    ) as HTMLTemplateElement | null;
-    if (!boxEl || !feedEl || !sentinelEl || !templateEl || !retryTemplateEl)
-      return;
-    // Narrowed bindings: hoisted inner functions don't inherit the guard above
-    const box = boxEl;
-    const feed = feedEl;
-    const sentinel = sentinelEl;
-    const template = templateEl;
-    const retryTemplate = retryTemplateEl;
+      let nextPage = Number(root.dataset.nextPage);
+      const totalPages = Number(root.dataset.totalPages);
+      const pageSize = Number(root.dataset.pageSize);
+      const endpoint = root.dataset.endpoint ?? "";
+      let skeletons: HTMLLIElement[] = [];
+      let loading = false;
 
-    let nextPage = Number(sentinel.dataset.nextPage);
-    const totalPages = Number(sentinel.dataset.totalPages);
-    const pageSize = Number(sentinel.dataset.pageSize);
-    const endpoint = sentinel.dataset.endpoint ?? "";
-    let skeletons: HTMLLIElement[] = [];
-    let loading = false;
-
-    function makeSkeleton(): HTMLLIElement | null {
-      const node = template.content.cloneNode(true) as DocumentFragment;
-      return node.querySelector("li");
-    }
-
-    // Placeholder rows are a Layer 3 affordance, so they are inserted here
-    // rather than in the build-time HTML — the no-JS page stays clean.
-    function appendSkeletons() {
-      skeletons = [];
-      for (let i = 0; i < pageSize; i++) {
-        const li = makeSkeleton();
-        if (!li) continue;
-        feed.appendChild(li);
-        skeletons.push(li);
+      function makeSkeleton(): HTMLLIElement | null {
+        const node = template.content.cloneNode(true) as DocumentFragment;
+        return node.querySelector("li");
       }
-      // Observing the first placeholder starts the fetch just as the
-      // reserved space approaches, so skeletons are visible only briefly
-      const first = skeletons[0];
-      if (first) observer?.observe(first);
-    }
 
-    function fill(
-      li: HTMLLIElement,
-      item: { title: string; body: string; seed: string },
-    ) {
-      const img = li.querySelector("img");
-      if (img) {
-        img.src = `https://picsum.photos/seed/${item.seed}/128/128`;
-        img.alt = item.title;
-      }
-      const text = li.querySelector("div");
-      if (text) {
-        // Snap to transparent without transitioning, then fade the content in
-        text.style.transition = "none";
-        text.style.opacity = "0";
-      }
-      const title = li.querySelector("[data-title]");
-      if (title) title.textContent = item.title;
-      const body = li.querySelector("[data-body]");
-      if (body) body.textContent = item.body;
-      li.dataset.state = "filled";
-      if (text) {
-        void text.offsetWidth;
-        text.style.transition = "";
-        text.style.opacity = "";
-      }
-    }
-
-    async function loadNext() {
-      if (loading) return;
-      loading = true;
-      try {
-        const res = await fetch(`${endpoint}${nextPage}.json`);
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        const items: { title: string; body: string; seed: string }[] =
-          await res.json();
-        observer?.disconnect();
-        items.forEach((item, i) => {
-          let li = skeletons[i];
-          if (!li) {
-            const extra = makeSkeleton();
-            if (!extra) return;
-            feed.appendChild(extra);
-            li = extra;
-          }
-          fill(li, item);
-        });
-        for (const leftover of skeletons.slice(items.length)) leftover.remove();
-        nextPage++;
-        if (nextPage > totalPages) {
-          skeletons = [];
-          sentinel.textContent = "— End of feed —";
-        } else {
-          appendSkeletons();
+      // Placeholder rows are a Layer 3 affordance, so they are inserted here
+      // rather than in the build-time HTML — the no-JS page stays clean.
+      function appendSkeletons() {
+        skeletons = [];
+        for (let i = 0; i < pageSize; i++) {
+          const li = makeSkeleton();
+          if (!li) continue;
+          feed.appendChild(li);
+          skeletons.push(li);
         }
-      } catch {
-        observer?.disconnect();
-        const btn = (
-          retryTemplate.content.cloneNode(true) as DocumentFragment
-        ).querySelector("button");
-        if (!btn) return;
-        btn.onclick = () => {
-          sentinel.replaceChildren();
-          loadNext();
-        };
-        sentinel.replaceChildren(btn);
-      } finally {
-        loading = false;
+        // Observing the first placeholder starts the fetch just as the
+        // reserved space approaches, so skeletons are visible only briefly
+        const first = skeletons[0];
+        if (first) observer.observe(first);
       }
-    }
 
-    observer = new IntersectionObserver(
-      (entries) => {
-        if (entries.some((e) => e.isIntersecting)) loadNext();
-      },
-      { root: box, rootMargin: "200px" },
-    );
+      function fill(
+        li: HTMLLIElement,
+        item: { title: string; body: string; seed: string },
+      ) {
+        const img = li.querySelector("img");
+        if (img) {
+          img.src = `https://picsum.photos/seed/${item.seed}/128/128`;
+          img.alt = item.title;
+        }
+        const text = li.querySelector("div");
+        if (text) {
+          // Snap to transparent without transitioning, then fade the content in
+          text.style.transition = "none";
+          text.style.opacity = "0";
+        }
+        const title = li.querySelector("[data-title]");
+        if (title) title.textContent = item.title;
+        const body = li.querySelector("[data-body]");
+        if (body) body.textContent = item.body;
+        li.dataset.state = "filled";
+        if (text) {
+          void text.offsetWidth;
+          text.style.transition = "";
+          text.style.opacity = "";
+        }
+      }
 
-    if (nextPage <= totalPages) appendSkeletons();
-    else sentinel.textContent = "— End of feed —";
-  });
+      async function loadNext() {
+        if (loading) return;
+        loading = true;
+        try {
+          const res = await fetch(`${endpoint}${nextPage}.json`);
+          if (!res.ok) throw new Error(`HTTP ${res.status}`);
+          const items: { title: string; body: string; seed: string }[] =
+            await res.json();
+          observer.disconnect();
+          items.forEach((item, i) => {
+            let li = skeletons[i];
+            if (!li) {
+              const extra = makeSkeleton();
+              if (!extra) return;
+              feed.appendChild(extra);
+              li = extra;
+            }
+            fill(li, item);
+          });
+          for (const leftover of skeletons.slice(items.length))
+            leftover.remove();
+          nextPage++;
+          if (nextPage > totalPages) {
+            skeletons = [];
+            sentinel.textContent = "— End of feed —";
+          } else {
+            appendSkeletons();
+          }
+        } catch {
+          observer.disconnect();
+          const btn = (
+            retryTemplate.content.cloneNode(true) as DocumentFragment
+          ).querySelector("button");
+          if (!btn) return;
+          btn.onclick = () => {
+            sentinel.replaceChildren();
+            loadNext();
+          };
+          sentinel.replaceChildren(btn);
+        } finally {
+          loading = false;
+        }
+      }
+
+      const observer = new IntersectionObserver(
+        (entries) => {
+          if (entries.some((e) => e.isIntersecting)) loadNext();
+        },
+        { root: box, rootMargin: "200px" },
+      );
+
+      if (nextPage <= totalPages) appendSkeletons();
+      else sentinel.textContent = "— End of feed —";
+    });
 </script>

@@ -38,12 +38,16 @@ import PrimaryButton from "./PrimaryButton.astro";
   />
   <PrimaryButton type="submit">Submit</PrimaryButton>
 </form>
-<div
-  id="validation-success"
-  hidden
-  class="mt-4 p-3 bg-success/10 border border-success rounded-sm text-success max-w-[400px] animate-fade-in-out"
->
-  All fields valid! In production, this form would submit to the server.
+<!-- The live region stays in the tree; only its content is revealed, so
+     screen readers announce the message when it appears. -->
+<div role="status">
+  <div
+    id="validation-success"
+    hidden
+    class="mt-4 p-3 bg-success/10 border border-success rounded-sm text-success max-w-[400px] animate-fade-in-out"
+  >
+    All fields valid! In production, this form would submit to the server.
+  </div>
 </div>
 
 <script>

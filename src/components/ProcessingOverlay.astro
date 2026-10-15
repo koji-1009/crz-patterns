@@ -17,21 +17,31 @@ const closeBtn =
   closedby="none"
   class="m-auto border-none outline-none bg-transparent text-white max-w-screen max-h-screen backdrop:bg-black/60"
 >
-  <div id="ol-loading" class={state}>
+  <div id={`${id}-loading`} class={state}>
     <div
       class="size-12 rounded-full border-4 border-white/30 border-t-white animate-[spin_0.8s_linear_infinite]"
     >
     </div>
     <p class="mt-4 text-lg">Processing...</p>
+    <!-- The opener is declarative, so the overlay can open before the script
+         that runs the work has loaded, or when it fails to. This way out is
+         the default; the script hides it once it actually owns the work. -->
+    <button
+      type="button"
+      command="close"
+      commandfor={id}
+      id={`${id}-cancel`}
+      class={closeBtn}>Cancel</button
+    >
   </div>
-  <div id="ol-success" class={state} hidden>
+  <div id={`${id}-success`} class={state} hidden>
     <div class:list={[mark, "bg-success text-on-success"]}>&#10003;</div>
     <p class="mt-4 text-lg">Complete!</p>
     <button type="button" command="close" commandfor={id} class={closeBtn}
       >Close</button
     >
   </div>
-  <div id="ol-error" class={state} hidden>
+  <div id={`${id}-error`} class={state} hidden>
     <div class:list={[mark, "bg-danger text-on-danger font-bold"]}>!</div>
     <p class="mt-4 text-lg">Error: ActionError</p>
     <p class="mt-1 text-sm opacity-75">INTERNAL_SERVER_ERROR</p>

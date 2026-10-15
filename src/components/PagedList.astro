@@ -16,7 +16,9 @@ const { page, totalPages, items, nextHref } = Astro.props;
   advance as you scroll.
 </p>
 <!-- The script fetches the next page's HTML and moves this container's
-     children across, so its structure is the contract between pages. -->
+     children across, so its structure is the contract between pages.
+     One per page by design: it advances the page's own URL, which a second
+     instance would fight over, so the fixed ids are deliberate. -->
 <div id="pages">
   {
     page > 1 && (

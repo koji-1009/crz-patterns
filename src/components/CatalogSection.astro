@@ -1,0 +1,21 @@
+---
+import PatternLink from "./PatternLink.astro";
+
+interface Props {
+  title: string;
+  patterns: { name: string; path: string; meta: string }[];
+}
+const { title, patterns } = Astro.props;
+const base = import.meta.env.BASE_URL;
+---
+
+<section>
+  <h2 class="mt-8 mb-3 text-sm text-muted uppercase tracking-wide font-bold">
+    {title}
+  </h2>
+  {
+    patterns.map((p) => (
+      <PatternLink href={`${base}${p.path}`} name={p.name} meta={p.meta} />
+    ))
+  }
+</section>

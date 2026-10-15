@@ -11,12 +11,18 @@ const { action } = Astro.props;
 
 <!-- GET back to this page, not POST: GitHub Pages serves static files and
      has nothing to accept a POST. The action must carry BASE_URL, or the
-     submit leaves the site root and 404s. -->
+     submit leaves the site root and 404s. Inputs carry no `name`, so the GET
+     puts no personal data in the URL; the draft is keyed by id instead. -->
 <form id="draft-form" method="get" action={action}>
   <div class="grid gap-4 max-w-[400px]">
-    <FormField label="Name" type="text" name="name" />
-    <FormField label="Email" type="email" name="email" />
-    <TextAreaField label="Message" name="message" rows={3} />
+    <FormField label="Name" type="text" id="draft-name" autocomplete="name" />
+    <FormField
+      label="Email"
+      type="email"
+      id="draft-email"
+      autocomplete="email"
+    />
+    <TextAreaField label="Message" id="draft-message" rows={3} />
     <PrimaryButton type="submit">Submit</PrimaryButton>
   </div>
 </form>
@@ -34,8 +40,8 @@ const { action } = Astro.props;
     const saved = sessionStorage.getItem(KEY);
     if (saved) {
       const data = JSON.parse(saved);
-      for (const [name, value] of Object.entries(data)) {
-        const el = form.elements.namedItem(name);
+      for (const [id, value] of Object.entries(data)) {
+        const el = form.elements.namedItem(id);
         if (
           el instanceof HTMLInputElement ||
           el instanceof HTMLTextAreaElement
@@ -52,9 +58,9 @@ const { action } = Astro.props;
         if (
           (el instanceof HTMLInputElement ||
             el instanceof HTMLTextAreaElement) &&
-          el.name
+          el.id
         ) {
-          data[el.name] = el.value;
+          data[el.id] = el.value;
         }
       }
       sessionStorage.setItem(KEY, JSON.stringify(data));

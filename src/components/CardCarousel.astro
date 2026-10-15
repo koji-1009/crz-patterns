@@ -1,0 +1,29 @@
+---
+interface Props {
+  cards: { id: number; title: string; seed: string }[];
+}
+const { cards } = Astro.props;
+---
+
+<div class="flex gap-4 overflow-x-auto snap-x snap-mandatory py-4">
+  {
+    cards.map((card) => (
+      <div class="flex-none w-[250px] snap-start rounded-md overflow-hidden border border-border bg-surface">
+        <img
+          src={`https://picsum.photos/seed/${card.seed}/250/150`}
+          alt={card.title}
+          width="250"
+          height="150"
+          loading="lazy"
+          class="w-full h-[150px] object-cover"
+        />
+        <div class="p-4">
+          <h3 class="font-semibold">{card.title}</h3>
+          <p class="text-sm text-muted mt-1">
+            Card {card.id} of {cards.length}
+          </p>
+        </div>
+      </div>
+    ))
+  }
+</div>

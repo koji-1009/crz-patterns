@@ -34,9 +34,10 @@ const resetHref = `${base}components/loading-overlay`;
       const stateComplete = byId("state-complete");
       const stateError = byId("state-error");
       const overlay = byId("overlay") as HTMLDialogElement | null;
-      const olLoading = byId("ol-loading");
-      const olSuccess = byId("ol-success");
-      const olError = byId("ol-error");
+      const olLoading = byId("overlay-loading");
+      const olCancel = byId("overlay-cancel");
+      const olSuccess = byId("overlay-success");
+      const olError = byId("overlay-error");
       const cfgDelay = byId("cfg-delay") as HTMLSelectElement | null;
       const cfgResult = byId("cfg-result") as HTMLSelectElement | null;
       const cfgAfter = byId("cfg-after") as HTMLSelectElement | null;
@@ -46,6 +47,7 @@ const resetHref = `${base}components/loading-overlay`;
         !stateError ||
         !overlay ||
         !olLoading ||
+        !olCancel ||
         !olSuccess ||
         !olError ||
         !cfgDelay ||
@@ -70,6 +72,8 @@ const resetHref = `${base}components/loading-overlay`;
         if (command !== "show-modal") return;
 
         olLoading.hidden = false;
+        // The work is now ours to finish, so the fallback way out goes
+        olCancel.hidden = true;
         olSuccess.hidden = true;
         olError.hidden = true;
 
